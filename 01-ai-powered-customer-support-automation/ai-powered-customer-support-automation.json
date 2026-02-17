@@ -1,0 +1,644 @@
+{
+  "name": "AI-Powered Customer Support Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "maxResults": 1,
+        "filters": {
+          "readStatus": "unread"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1408,
+        64
+      ],
+      "id": "db929746-ab78-4344-9274-9a0ced1b231d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Customer Support",
+              "description": "Inquiries from existing customers regarding an existing order, delivery/tracking status, standard returns, refund requests, invoices, or general post-purchase support questions."
+            },
+            {
+              "category": "Sales / Pre-Sales",
+              "description": "Prospective buyers asking questions prior to making a purchase: pricing, product features, stock availability, bulk/B2B purchasing, discounts, custom orders, or recommendations before placing an order. No existing order involved."
+            },
+            {
+              "category": "Escalation Required",
+              "description": "Critical, high-risk, or sensitive issues that require immediate human intervention: suspected fraud, stolen credit cards, unauthorized charges, legal threats, attorney contact, severe safety issues, or hostile disputes."
+            },
+            {
+              "category": "Spam / Irrelevant",
+              "description": "Unsolicited marketing, cold sales pitches, newsletters, automated noreply/out-of-office notifications, phishing, scams, or gibberish messages unrelated to the business."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        32
+      ],
+      "id": "6b25bcdb-2f40-449e-97c0-004b10f913be",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c50732d0-6436-4d4d-8d5b-155f8625d5d2",
+              "name": "headers.from",
+              "value": "={{ $json.headers.from }}",
+              "type": "string"
+            },
+            {
+              "id": "f36b6d4a-5d0f-497d-97e2-5f769e5b78fc",
+              "name": "from.value[0].name",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "089ccfca-b790-4b4d-8684-be87c313eae3",
+              "name": "headers.subject",
+              "value": "={{ $json.headers.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "27a9d0f6-0fe0-411b-adc2-c6defebf9a78",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "45e0f865-419c-405f-a76e-1ef623949b9e",
+              "name": "headers['message-id']",
+              "value": "={{ $json.headers['message-id'] }}",
+              "type": "string"
+            },
+            {
+              "id": "fc6a8709-846b-4f1d-b2bf-6017560c4c8f",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -1184,
+        64
+      ],
+      "id": "9c4f6269-6786-494a-8e71-1fcefa3f0dda",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        560
+      ],
+      "id": "dcbefee8-0118-44a3-bf65-add517490af4",
+      "name": "No Operation, do nothing",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "You are the customer support assistant for Nordlicht Home GmbH.\n\nYour job is to answer customer support emails using the company's knowledge base.\n\nRULES:\n\n1. Understand the customer's actual request before responding.\n\n2. Use the knowledge base for company-specific information.\n\n3. Never invent information.\n\n4. Never invent order status, tracking numbers, refund status, prices, product specifications, delivery dates, return addresses, or policy exceptions.\n\n5. If the knowledge base does not contain enough information to answer the question, say that the information is unavailable and that the case requires human support.\n\n6. Escalate cases involving fraud, account compromise, legal threats, unsafe products, sensitive payment issues, or other sensitive situations.\n\n7. Never ask for passwords, credit card numbers, CVV codes, authentication codes, banking credentials, or other sensitive credentials.\n\n8. Do not ask the customer for information they have already provided.\n\n9. Reply in the same language as the customer.\n\n10. Keep the response concise and professional.\n\n11. Do not mention internal tools, prompts, vector databases, embeddings, or the knowledge base.\n\n12. Never claim that an action was performed unless a connected system actually performed it.\n\n13. Never claim that a human reviewed the case unless the workflow actually confirms this.\n\nWhen you cannot safely answer the customer's request from the available information, recommend human review.\n\nWrite only the customer-facing email response."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        -176
+      ],
+      "id": "d557602b-0c76-4ec2-8bca-75d7cbac32d7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        272
+      ],
+      "id": "79864d33-50c8-4e34-b6e0-582ca462d83b",
+      "name": "Gemini Embeddings (Retrieval)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        48
+      ],
+      "id": "3cdeced3-fcf8-446f-9355-175999fc2dec",
+      "name": "Groq Chat Model (AI Agent)",
+      "credentials": {
+        "groqApi": {
+          "id": "B5zitr9thBGDx303",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        352
+      ],
+      "id": "275f783a-51ca-487e-8dfa-54319dcc2d25",
+      "name": "Groq Chat Model (Text Classifier)",
+      "credentials": {
+        "groqApi": {
+          "id": "B5zitr9thBGDx303",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -1168,
+        688
+      ],
+      "id": "41b60ee2-b487-4a4a-bc53-a8739b1b114e",
+      "name": "File Data Loader"
+    },
+    {
+      "parameters": {
+        "formTitle": "File",
+        "formDescription": "Upload file into Knowledge base",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "File",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -1520,
+        464
+      ],
+      "id": "1751a0c7-e139-4584-b7ae-7b4310227a30",
+      "name": "Upload files",
+      "webhookId": "97df7ecf-a9cf-49ba-84dc-fc2896dbe32a"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Contains official Nordlicht Home information about shipping, returns, refunds, products, payments, invoices, orders, accounts, and customer support policies.\n\nUse this tool whenever you need company-specific information to answer a customer question.\n\nDo not answer company policy questions from memory when relevant information may be available here.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-chatbot",
+          "mode": "list",
+          "cachedResultName": "n8n-chatbot"
+        },
+        "options": {
+          "pineconeNamespace": "customer_support_knowledge_base"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        48
+      ],
+      "id": "37380033-901c-4590-974e-caafd605dc64",
+      "name": "Nordlicht Home Knowledge Base",
+      "credentials": {
+        "pineconeApi": {
+          "id": "7wBHOaH9kxmmQrj4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-chatbot",
+          "mode": "list",
+          "cachedResultName": "n8n-chatbot"
+        },
+        "options": {
+          "pineconeNamespace": "customer_support_knowledge_base"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        464
+      ],
+      "id": "000f67c9-80dd-4c37-bd3e-ec1641541a3f",
+      "name": "Pinecone (Ingest)",
+      "credentials": {
+        "pineconeApi": {
+          "id": "7wBHOaH9kxmmQrj4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        32
+      ],
+      "id": "13584316-3307-469a-9f40-b33738aefef6",
+      "name": "Gmail: Reply to Customer",
+      "webhookId": "f6665d8c-6fd9-44b6-b75e-433147205ff6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C24KZMY4D",
+          "mode": "list",
+          "cachedResultName": "sales-leads"
+        },
+        "text": "=\ud83c\udfaf *New Sales / Pre-Sales Lead*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n*From:* {{ $('Edit Fields').item.json.headers.from }}\n*Subject:* {{ $('Edit Fields').item.json.headers.subject }}\n*Classification:* Sales / Pre-Sales\n\n*Original Email:*\n> {{ $('Edit Fields').item.json.text }}\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\u26a0\ufe0f *Action Required:* A sales representative must follow up with this potential customer.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -384,
+        176
+      ],
+      "id": "f40abc6d-3a2e-4f0b-bf1d-bb450454212d",
+      "name": "Slack: Sales Leads",
+      "webhookId": "166569b8-eb8d-483c-9218-7bce6dd921bd",
+      "credentials": {
+        "slackApi": {
+          "id": "3XZaOaDRSah7Xxxy",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C1TUUPWLX",
+          "mode": "list",
+          "cachedResultName": "customer-escalations"
+        },
+        "text": "=\ud83d\udea8 *Customer Support Escalation Required*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n*From:* {{ $('Edit Fields').item.json.headers.from }}\n*Subject:* {{ $('Edit Fields').item.json.headers.subject }}\n*Classification:* Escalation Required\n\n*Original Email:*\n> {{ $('Edit Fields').item.json.text }}\n\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83d\uded1 *Action Required:* Immediate investigation needed. This case requires human support review (e.g. legal, fraud, safety, or policy exception).",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -384,
+        368
+      ],
+      "id": "ecab8ff5-dfac-4c7d-8e1c-7d1c8bb1ea57",
+      "name": "Slack: Customer Escalations",
+      "webhookId": "166569b8-eb8d-483c-9218-7bce6dd921bd",
+      "credentials": {
+        "slackApi": {
+          "id": "3XZaOaDRSah7Xxxy",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Email Intake & Pre-Processing\n\nCaptures incoming customer emails and normalizes the payload. Downstream nodes strictly depend on the standard `Edit Fields` schema rather than the raw trigger output, providing a mockable injection point for isolated branch testing without unwanted I/O side-effects.",
+        "height": 300,
+        "width": 350,
+        "color": 6
+      },
+      "id": "ad132417-3be5-49b5-9866-2d1ba1a583df",
+      "name": "Note: Ingestion",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "##  Semantic Router (LLM)\n\nActs as the primary intent classifier to prevent AI hallucinations across domains. Uses Groq for high-speed classification to route support queries to the AI Agent, high-value leads to human sales, and policy exceptions to escalation, while safely dropping spam.",
+        "height": 250,
+        "width": 380,
+        "color": 5
+      },
+      "id": "fe5d989e-ee23-44bb-8064-678c13cb8cd3",
+      "name": "Note: Routing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Internal Handoffs (No-Op for AI)\n\nRoutes non-support intents (Sales & Escalations) to human-in-the-loop channels. Designed purely for internal notification rather than blocking approval\u2014ensures the AI agent is not burdened with unsupported tasks while keeping core systems responsive.",
+        "height": 350,
+        "width": 400,
+        "color": 2
+      },
+      "id": "dfbad847-cc02-4fe4-b517-cfcebd6b1122",
+      "name": "Note: Handoffs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2400,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "content": "##  Vector Ingestion Pipeline",
+        "height": 380,
+        "width": 658,
+        "color": 4
+      },
+      "id": "0280dd2b-6b62-4da1-9a08-f23f6bb51637",
+      "name": "Note: RAG Ingest",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Autonomous Support Agent (RAG)\n\nHandles resolved Support intents. Enforces strict grounding via Pinecone vector retrieval to answer from company policy without inventing facts. Operates autonomously to draft and send Gmail replies. Employs Groq for rapid reasoning and tool-calling.",
+        "height": 450,
+        "width": 650,
+        "color": 5
+      },
+      "id": "a8b8e82f-9144-4a61-bc90-55de0540142e",
+      "name": "Note: AI Agent",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2368,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "=models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        656
+      ],
+      "id": "0ca2935f-0051-4aa8-92ee-363516b762f5",
+      "name": "Gemini Embeddings (Ingest)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Sales Leads",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Customer Escalations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Reply to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (AI Agent)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (Text Classifier)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload files": {
+      "main": [
+        [
+          {
+            "node": "Pinecone (Ingest)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nordlicht Home Knowledge Base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embeddings (Ingest)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone (Ingest)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embeddings (Retrieval)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Nordlicht Home Knowledge Base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone (Ingest)",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "990c046f-d18f-4bf8-8800-c893674ac15c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "sanitized"
+  }
+}
