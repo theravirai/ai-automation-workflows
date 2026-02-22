@@ -147,6 +147,8 @@ The pipeline has been verified across all core classification paths using realis
 01-ai-powered-customer-support-automation/
 ├── README.md                                    # Project documentation (this file)
 ├── ai-powered-customer-support-automation.json  # Sanitized n8n workflow export (ready to import)
+├── docs/                                        # Deep-dive architecture & node specifications
+│   └── workflow-explanation.md                 # Detailed node-by-node technical guide
 ├── assets/                                      # Canvas screenshots & verification evidence
 │   ├── workflow-canvas.png
 │   ├── test-support-ai-email-reply.png
@@ -157,6 +159,8 @@ The pipeline has been verified across all core classification paths using realis
 └── knowledge-base/                              # RAG source documents
     └── customer_support_knowledge_base.md       # Policy documentation for Nordlicht Home GmbH
 ```
+
+> **Deep Dive:** For a comprehensive, node-by-node architectural breakdown and configuration details, read the [Workflow Explanation Guide](docs/workflow-explanation.md).
 
 ---
 
