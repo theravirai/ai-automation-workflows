@@ -74,6 +74,118 @@
       ],
       "id": "4b052366-6564-4aed-b16b-14c68757d5f4",
       "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "invoice_number",
+              "description": "Unique invoice reference number or identifier",
+              "required": true
+            },
+            {
+              "name": "invoice_date",
+              "description": "Invoice issuance date in DD.MM.YYYY format (e.g. 21.09.2026)",
+              "required": true
+            },
+            {
+              "name": "due_date",
+              "description": "Payment due date in DD.MM.YYYY format (e.g. 15.10.2026)"
+            },
+            {
+              "name": "vendor_name",
+              "description": "Legal name of the vendor or supplier issuing the invoice",
+              "required": true
+            },
+            {
+              "name": "vendor_vat_id",
+              "description": "VAT or tax identification number of the vendor"
+            },
+            {
+              "name": "customer_name",
+              "description": "Name of the customer or client being billed",
+              "required": true
+            },
+            {
+              "name": "customer_vat_id",
+              "description": "VAT or tax identification number of the customer"
+            },
+            {
+              "name": "line_items",
+              "description": "JSON array string or formatted list of line items including description, quantity, unit price, and item total"
+            },
+            {
+              "name": "subtotal",
+              "type": "number",
+              "description": "Net subtotal amount before VAT or taxes",
+              "required": true
+            },
+            {
+              "name": "vat_rate",
+              "type": "number",
+              "description": "VAT or tax percentage rate (e.g. 20 for 20%)"
+            },
+            {
+              "name": "vat_amount",
+              "type": "number",
+              "description": "Total calculated or stated VAT tax amount",
+              "required": true
+            },
+            {
+              "name": "total_amount",
+              "type": "number",
+              "description": "Final grand total invoice amount including all taxes",
+              "required": true
+            },
+            {
+              "name": "currency",
+              "description": "Three-letter ISO currency code (e.g. USD, EUR, GBP)",
+              "required": true
+            },
+            {
+              "name": "iban",
+              "description": "Bank account IBAN number for payment"
+            },
+            {
+              "name": "payment_terms",
+              "description": "Payment terms or conditions (e.g. Net 30, Due on receipt)"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a strict, precision-oriented enterprise invoice data extraction specialist. Your task is to extract structured invoice data from the provided text according to the exact schema. Follow these rules strictly:\n1. Grounding: Extract values ONLY if they are explicitly stated in the source text. NEVER guess, assume, or fabricate any missing information.\n2. Missing Fields: If any field is not found or not mentioned in the text, leave it empty or null.\n3. Dates: Normalize all dates into DD.MM.YYYY format (day.month.year, e.g. 21.09.2026).\n4. Numbers: Extract monetary values as clean numbers (float/integer) without currency symbols or commas.\n5. Line Items: Return line items as a clean JSON-formatted array string containing description, quantity, unit price, and total.\n6. Currency: Use standard 3-letter ISO codes (EUR, USD, GBP, etc.)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "61900f3e-a7f4-416b-a67c-2499d369ab5f",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        240
+      ],
+      "id": "d379ef0a-99df-4c1a-9277-40413e696fa1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "connections": {
@@ -101,7 +213,29 @@
     },
     "Extract from File": {
       "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
         []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     }
   },
