@@ -200,6 +200,286 @@
         1024,
         0
       ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg",
+          "mode": "list",
+          "cachedResultName": "invoice-details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "currency": "={{ $json.currency }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "customer_vat_id": "={{ $json.customer_vat_id }}",
+            "due_date": "={{ $json.due_date }}",
+            "iban": "={{ $json.iban }}",
+            "invoice_date": "={{ $json.invoice_date }}",
+            "invoice_number": "={{ $json.invoice_number }}",
+            "line_items": "={{ $json.line_items }}",
+            "payment_terms": "={{ $json.payment_terms }}",
+            "subtotal": "={{ $json.subtotal }}",
+            "total_amount": "={{ $json.total_amount }}",
+            "vat_amount": "={{ $json.vat_amount }}",
+            "vat_rate": "={{ $json.vat_rate }}",
+            "vendor_name": "={{ $json.vendor_name }}",
+            "vendor_vat_id": "={{ $json.vendor_vat_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "invoice_number",
+              "id": "invoice_number",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "invoice_date",
+              "id": "invoice_date",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "due_date",
+              "id": "due_date",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "vendor_name",
+              "id": "vendor_name",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "vendor_vat_id",
+              "id": "vendor_vat_id",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "customer_name",
+              "id": "customer_name",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "customer_vat_id",
+              "id": "customer_vat_id",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "line_items",
+              "id": "line_items",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "subtotal",
+              "id": "subtotal",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "vat_rate",
+              "id": "vat_rate",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "vat_amount",
+              "id": "vat_amount",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "total_amount",
+              "id": "total_amount",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "currency",
+              "id": "currency",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "iban",
+              "id": "iban",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payment_terms",
+              "id": "payment_terms",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2200,
+        0
+      ],
+      "id": "2ce59157-f0ba-4f64-a00c-9da5c9b97321",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DI5bHcLvPU96vN6M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Please compose a formal executive invoice summary notification email based on the following extracted invoice data, validation results, and original text:\n\n--- EXTRACTED INVOICE DETAILS ---\n\u2022 Vendor: {{ $('Validate Invoice Data').item.json.vendor_name || 'N/A' }}\n\u2022 Vendor Tax/VAT ID: {{ $('Validate Invoice Data').item.json.vendor_vat_id || 'N/A' }}\n\u2022 Customer: {{ $('Validate Invoice Data').item.json.customer_name || 'N/A' }}\n\u2022 Customer Tax/VAT ID: {{ $('Validate Invoice Data').item.json.customer_vat_id || 'N/A' }}\n\u2022 Invoice Number: {{ $('Validate Invoice Data').item.json.invoice_number || 'N/A' }}\n\u2022 Invoice Date: {{ $('Validate Invoice Data').item.json.invoice_date || 'N/A' }}\n\u2022 Due Date: {{ $('Validate Invoice Data').item.json.due_date || 'N/A' }}\n\u2022 Payment Terms: {{ $('Validate Invoice Data').item.json.payment_terms || 'N/A' }}\n\u2022 IBAN / Account: {{ $('Validate Invoice Data').item.json.iban || 'N/A' }}\n\u2022 Subtotal: {{ $('Validate Invoice Data').item.json.subtotal }} {{ $('Validate Invoice Data').item.json.currency }}\n\u2022 VAT Rate: {{ $('Validate Invoice Data').item.json.vat_rate }}%\n\u2022 VAT Amount: {{ $('Validate Invoice Data').item.json.vat_amount }} {{ $('Validate Invoice Data').item.json.currency }}\n\u2022 Total Amount: {{ $('Validate Invoice Data').item.json.total_amount }} {{ $('Validate Invoice Data').item.json.currency }}\n\u2022 Line Items Summary: {{ $('Validate Invoice Data').item.json.line_items || 'None specified' }}\n\u2022 Line Items Detail: {{ JSON.stringify($('Validate Invoice Data').item.json.line_items_raw) }}\n\n--- VALIDATION STATUS ---\n\u2022 Status: {{ $('Validate Invoice Data').item.json.validation_status }}\n\u2022 Errors: {{ JSON.stringify($('Validate Invoice Data').item.json.validation_errors) }}\n\u2022 Warnings: {{ JSON.stringify($('Validate Invoice Data').item.json.validation_warnings) }}\n\u2022 Summary: {{ $('Validate Invoice Data').item.json.validation_summary }}\n\n--- RAW INVOICE TEXT CONTENT ---\n{{ $('Extract from File').item.json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are an enterprise finance operations assistant. Generate a formal, clean, executive-ready HTML notification email for an incoming invoice that has been parsed and logged to Google Sheets.\n\nStyle and tone guidelines:\n1. Professional Tone: Maintain a strict, formal corporate finance tone. Do NOT use any emojis anywhere in the email (no checkmarks, warning icons, etc.). Use clear text badges and typographic hierarchy instead.\n2. Strict Grounding: Use ONLY the provided invoice details and validation checks. NEVER invent or hallucinate any numbers, vendor details, bank codes, or line items.\n3. Structure:\n   - Header with status label: \"[STATUS: VALIDATED - READY FOR PAYMENT]\" or \"[STATUS: REQUIRES REVIEW - VALIDATION ISSUES DETECTED]\".\n   - Core Summary Table / Grid: Vendor, Invoice Number, Invoice Date (DD.MM.YYYY), Due Date (DD.MM.YYYY), Total Amount, Currency, and Payment Terms.\n   - Financial Breakdown: Subtotal, VAT Rate, VAT Amount, Grand Total.\n   - Audit / Validation Details: Clear status of verification checks (required fields, VAT calculation, total amount consistency, date consistency).\n   - Line Items Table: If item descriptions and quantities/amounts are present, render a clean, professional HTML table (Columns: Description, Qty, Unit Price, Total); otherwise omit.\n   - Payment Details: IBAN / payment instructions if present.\n4. Styling: Output clean, responsive HTML using inline CSS styles (neutral corporate color palette: navy, slate, charcoal, clean borders, legible typography like Arial/Helvetica/sans-serif, soft neutral backgrounds).\n5. Output format: Return pure HTML only. Do NOT wrap the response in markdown backticks or code blocks like ```html."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        2440,
+        0
+      ],
+      "id": "ac3b2f73-553d-4295-aa6b-e659e4e46ca6",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ravirai.work@gmail.com",
+        "subject": "={{ $('Validate Invoice Data').item.json.is_valid ? '[PROCESSED] Invoice #' + $('Validate Invoice Data').item.json.invoice_number + ' - ' + $('Validate Invoice Data').item.json.vendor_name : '[ACTION REQUIRED] Invoice Validation Issue - ' + $('Validate Invoice Data').item.json.vendor_name + ' (#' + $('Validate Invoice Data').item.json.invoice_number + ')' }}",
+        "message": "={{ (typeof $json.text === 'string' && $json.text) ? $json.text : ($json.content?.parts?.[0]?.text || (typeof $json.content === 'string' ? $json.content : '') || $('Message a model').item.json.content?.parts?.[0]?.text || $('Message a model').item.json.text || '') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2680,
+        0
+      ],
+      "id": "c6ce0741-dc95-49ab-b107-95099a53c8fe",
+      "name": "Send a message",
+      "webhookId": "7abbce89-2e90-4dff-af45-1765ab67554d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2920,
+        0
+      ],
+      "id": "6b4903a3-2789-438b-aae9-7598505ddd0d",
+      "name": "No Operation, do nothing"
     }
   ],
   "connections": {
@@ -260,7 +540,46 @@
     },
     "Validate Invoice Data": {
       "main": [
-        []
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
