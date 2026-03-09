@@ -480,6 +480,185 @@
       ],
       "id": "6b4903a3-2789-438b-aae9-7598505ddd0d",
       "name": "No Operation, do nothing"
+    },
+    {
+      "id": "668b3589-283e-4de9-910b-753c755516d6",
+      "name": "Check Existing Invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "invoice-details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg/edit?usp=drivesdk",
+          "mode": "list",
+          "value": "1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "invoice_number",
+              "lookupValue": "={{ $('Validate Invoice Data').item.json.invoice_number }}"
+            }
+          ]
+        },
+        "operation": "read",
+        "options": {
+          "returnFirstMatch": true
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DAb-3cNauQJIr7AFM_ZRaGRbfw-TWmfm0rbxh_5ZZSg/edit#gid=0",
+          "mode": "list",
+          "value": "gid=0"
+        }
+      },
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DI5bHcLvPU96vN6M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "ae4cdfb2-31ef-42d5-8401-38f513e02586",
+      "name": "Evaluate Duplicate Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const searchResult = $input.item.json;\nconst invoiceData = $('Validate Invoice Data').item.json;\n\n// Check if a row with the same invoice number was found in Google Sheets\nconst isDuplicate = Boolean(\n  searchResult &&\n  searchResult.invoice_number &&\n  String(searchResult.invoice_number).trim().toLowerCase() === String(invoiceData.invoice_number).trim().toLowerCase()\n);\n\nreturn {\n  json: {\n    ...invoiceData,\n    is_duplicate: isDuplicate,\n    duplicate_matched_row: isDuplicate ? searchResult : null\n  }\n};",
+        "language": "javaScript",
+        "mode": "runOnceForEachItem"
+      }
+    },
+    {
+      "id": "301e5534-f325-4a29-aa20-d7ad93d8329d",
+      "name": "Is Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_duplicate }}",
+              "operator": {
+                "operation": "equals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "fe9643b4-d36f-4e8d-a71a-220f37a8b26c",
+      "name": "Send Duplicate Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1940,
+        -160
+      ],
+      "parameters": {
+        "emailType": "html",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Duplicate Invoice Detected</title>\n</head>\n<body style=\"margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; background-color: #f8fafc; color: #1e293b;\">\n    <table role=\"presentation\" width=\"100%\" style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; border-collapse: collapse;\">\n        <tr>\n            <td style=\"background-color: #0f172a; padding: 20px; text-align: center; border-radius: 6px 6px 0 0;\">\n                <span style=\"font-size: 11px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;\">Finance Operations Notice</span>\n                <h1 style=\"color: #f1f5f9; font-size: 16px; font-weight: 700; margin: 0;\">[STATUS: DUPLICATE DETECTED - SKIPPED]</h1>\n            </td>\n        </tr>\n        <tr>\n            <td style=\"padding: 24px;\">\n                <p style=\"margin: 0 0 16px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                    An incoming invoice was parsed, but an existing record with the exact same invoice number was already found in the central ledger. To prevent duplicate payment and reporting, this invoice has <strong>NOT</strong> been appended again.\n                </p>\n                <table role=\"presentation\" width=\"100%\" style=\"border-collapse: collapse; background-color: #f1f5f9; border-radius: 4px; border: 1px solid #e2e8f0; margin-bottom: 20px;\">\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #64748b; width: 40%;\">Invoice Number</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #0f172a;\">{{ $json.invoice_number }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0;\">Vendor</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #0f172a; border-top: 1px solid #e2e8f0;\">{{ $json.vendor_name }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0;\">Invoice Date</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #0f172a; border-top: 1px solid #e2e8f0;\">{{ $json.invoice_date }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0;\">Total Amount</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #0f172a; border-top: 1px solid #e2e8f0;\">{{ $json.total_amount }} {{ $json.currency }}</td>\n                    </tr>\n                </table>\n                <p style=\"margin: 0; font-size: 12px; color: #64748b; line-height: 1.4;\">\n                    Action Taken: Workflow halted for this record. No action is required unless this duplicate requires manual investigation.\n                </p>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+        "operation": "send",
+        "options": {
+          "appendAttribution": false
+        },
+        "resource": "message",
+        "sendTo": "ravirai.work@gmail.com",
+        "subject": "=[DUPLICATE DETECTED] Invoice #{{ $json.invoice_number }} - {{ $json.vendor_name }}"
+      },
+      "webhookId": "936a3006-5d6b-4df6-a11f-63ad651550a5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "b2d2f35c-f7b3-4731-8085-5ed2f9a6d46b",
+      "name": "Is Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1940,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_valid }}",
+              "operator": {
+                "operation": "equals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "adce0550-4355-4c6e-916b-6cc20bd0869b",
+      "name": "Send Review Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2200,
+        220
+      ],
+      "parameters": {
+        "emailType": "html",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Invoice Validation Review Required</title>\n</head>\n<body style=\"margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; background-color: #f8fafc; color: #1e293b;\">\n    <table role=\"presentation\" width=\"100%\" style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #ef4444; border-radius: 6px; border-collapse: collapse;\">\n        <tr>\n            <td style=\"background-color: #991b1b; padding: 20px; text-align: center; border-radius: 6px 6px 0 0;\">\n                <span style=\"font-size: 11px; font-weight: bold; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;\">Human Review Required</span>\n                <h1 style=\"color: #ffffff; font-size: 16px; font-weight: 700; margin: 0;\">[STATUS: REVIEW REQUIRED - VALIDATION AUDIT FAILED]</h1>\n            </td>\n        </tr>\n        <tr>\n            <td style=\"padding: 24px;\">\n                <p style=\"margin: 0 0 16px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                    The following invoice failed deterministic verification checks. It has <strong>NOT</strong> been appended to the Google Sheets ledger and is <strong>NOT</strong> marked ready for payment. Immediate manual review is required.\n                </p>\n                <table role=\"presentation\" width=\"100%\" style=\"border-collapse: collapse; background-color: #fef2f2; border-radius: 4px; border: 1px solid #fecaca; margin-bottom: 20px;\">\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #991b1b; width: 40%;\">Invoice Number</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #7f1d1d;\">{{ $json.invoice_number || 'N/A (Missing)' }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #991b1b; border-top: 1px solid #fecaca;\">Vendor</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #7f1d1d; border-top: 1px solid #fecaca;\">{{ $json.vendor_name || 'N/A (Missing)' }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #991b1b; border-top: 1px solid #fecaca;\">Invoice Date</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #7f1d1d; border-top: 1px solid #fecaca;\">{{ $json.invoice_date || 'N/A' }}</td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 10px 14px; font-size: 13px; color: #991b1b; border-top: 1px solid #fecaca;\">Extracted Total Amount</td>\n                        <td style=\"padding: 10px 14px; font-size: 13px; font-weight: bold; color: #7f1d1d; border-top: 1px solid #fecaca;\">{{ $json.total_amount || 'N/A' }} {{ $json.currency || '' }}</td>\n                    </tr>\n                </table>\n\n                <h3 style=\"font-size: 13px; font-weight: bold; color: #991b1b; text-transform: uppercase; margin: 16px 0 8px 0;\">Specific Validation Failures</h3>\n                <ul style=\"margin: 0 0 16px 0; padding-left: 20px; font-size: 13px; color: #b91c1c; line-height: 1.6;\">\n                    {{ $json.validation_errors && $json.validation_errors.length > 0 ? $json.validation_errors.map(err => '<li>' + err + '</li>').join('') : '<li>General validation failure</li>' }}\n                </ul>\n\n                <div style=\"padding: 12px; background-color: #f1f5f9; border-left: 4px solid #64748b; font-size: 12px; color: #475569; line-height: 1.4;\">\n                    <strong>Audit Summary:</strong> {{ $json.validation_summary }}\n                </div>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+        "operation": "send",
+        "options": {
+          "appendAttribution": false
+        },
+        "resource": "message",
+        "sendTo": "ravirai.work@gmail.com",
+        "subject": "=[REVIEW REQUIRED] Invoice Validation Failed - {{ $json.vendor_name || 'Unknown Vendor' }} ({{ $json.invoice_number || 'N/A' }})"
+      },
+      "webhookId": "a56bb384-8edf-4013-b3ba-18878f193a24",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "connections": {
@@ -542,7 +721,7 @@
       "main": [
         [
           {
-            "node": "Append row in sheet",
+            "node": "Check Existing Invoice",
             "type": "main",
             "index": 0
           }
@@ -572,6 +751,86 @@
       ]
     },
     "Send a message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Invoice": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Duplicate Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Duplicate Status": {
+      "main": [
+        [
+          {
+            "node": "Is Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Send Duplicate Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Duplicate Notification": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Review Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Review Alert": {
       "main": [
         [
           {
