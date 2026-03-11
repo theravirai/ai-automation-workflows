@@ -169,40 +169,6 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-3.5-flash-lite",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1.1,
-      "position": [
-        752,
-        240
-      ],
-      "id": "d379ef0a-99df-4c1a-9277-40413e696fa1",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "mlDGlX2lonl50RGr",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const rawItem = $input.item.json;\nconst data = (rawItem && typeof rawItem.output === 'object' && rawItem.output !== null)\n  ? rawItem.output\n  : (rawItem || {});\n\nfunction parseNumber(val) {\n  if (typeof val === 'number') return val;\n  if (!val) return null;\n  const cleanStr = String(val).replace(/[^0-9.-]+/g, '');\n  const num = parseFloat(cleanStr);\n  return isNaN(num) ? null : num;\n}\n\nfunction parseAndNormalizeDate(dateStr) {\n  if (!dateStr || typeof dateStr !== 'string') return { valid: false, formatted: null, dateObj: null };\n  const trimmed = dateStr.trim();\n  \n  const dmyMatch = trimmed.match(/^(\\d{1,2})[./-](\\d{1,2})[./-](\\d{4})$/);\n  if (dmyMatch) {\n    const day = parseInt(dmyMatch[1], 10);\n    const month = parseInt(dmyMatch[2], 10);\n    const year = parseInt(dmyMatch[3], 10);\n    const d = new Date(year, month - 1, day);\n    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {\n      const formatted = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;\n      return { valid: true, formatted, dateObj: d };\n    }\n  }\n\n  const ymdMatch = trimmed.match(/^(\\d{4})[./-](\\d{1,2})[./-](\\d{1,2})$/);\n  if (ymdMatch) {\n    const year = parseInt(ymdMatch[1], 10);\n    const month = parseInt(ymdMatch[2], 10);\n    const day = parseInt(ymdMatch[3], 10);\n    const d = new Date(year, month - 1, day);\n    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {\n      const formatted = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;\n      return { valid: true, formatted, dateObj: d };\n    }\n  }\n\n  const parsed = new Date(trimmed);\n  if (!isNaN(parsed.getTime())) {\n    const day = String(parsed.getDate()).padStart(2, '0');\n    const month = String(parsed.getMonth() + 1).padStart(2, '0');\n    const year = parsed.getFullYear();\n    return { valid: true, formatted: `${day}.${month}.${year}`, dateObj: parsed };\n  }\n\n  return { valid: false, formatted: trimmed, dateObj: null };\n}\n\nfunction formatLineItems(items) {\n  if (!items) return '';\n  let parsed = items;\n  if (typeof items === 'string') {\n    try {\n      parsed = JSON.parse(items);\n    } catch (e) {\n      return items.trim();\n    }\n  }\n  if (Array.isArray(parsed)) {\n    return parsed.map(item => {\n      const desc = item.description || item.name || item.item || 'Item';\n      const qty = item.quantity !== undefined ? item.quantity : item.qty;\n      const unitPrice = item.unit_price !== undefined ? item.unit_price : item.price;\n      const total = item.total !== undefined ? item.total : item.amount;\n      \n      let part = desc;\n      if (qty !== undefined && unitPrice !== undefined) {\n        part += ` (${qty}x ${unitPrice})`;\n      } else if (qty !== undefined) {\n        part += ` (Qty: ${qty})`;\n      }\n      if (total !== undefined) {\n        part += ` = ${total}`;\n      }\n      return part;\n    }).join('; ');\n  }\n  return String(items);\n}\n\nconst errors = [];\nconst warnings = [];\n\nif (!data.invoice_number || String(data.invoice_number).trim() === '') {\n  errors.push('Missing or empty required field: invoice_number');\n}\n\nconst invDateResult = parseAndNormalizeDate(data.invoice_date);\nif (!invDateResult.valid) {\n  errors.push(`Invalid or missing invoice_date: \"${data.invoice_date}\". Expected valid date.`);\n}\n\nif (!data.vendor_name || String(data.vendor_name).trim() === '') {\n  errors.push('Missing or empty required field: vendor_name');\n}\nif (!data.customer_name || String(data.customer_name).trim() === '') {\n  warnings.push('Missing customer_name');\n}\nif (!data.currency || String(data.currency).trim() === '') {\n  errors.push('Missing currency code');\n}\n\nconst subtotal = parseNumber(data.subtotal);\nconst vatRate = parseNumber(data.vat_rate);\nconst vatAmount = parseNumber(data.vat_amount);\nconst totalAmount = parseNumber(data.total_amount);\n\nif (totalAmount === null || totalAmount <= 0) {\n  errors.push(`Invalid total_amount: \"${data.total_amount}\". Must be a positive number.`);\n}\nif (subtotal === null || subtotal <= 0) {\n  errors.push(`Invalid subtotal: \"${data.subtotal}\". Must be a positive number.`);\n}\nif (vatAmount === null && vatRate !== null && vatRate > 0) {\n  errors.push('Missing vat_amount when vat_rate is specified.');\n}\n\nlet dueDateResult = { valid: false, formatted: null, dateObj: null };\nif (data.due_date) {\n  dueDateResult = parseAndNormalizeDate(data.due_date);\n  if (!dueDateResult.valid) {\n    warnings.push(`due_date \"${data.due_date}\" could not be validated.`);\n  } else if (invDateResult.valid && dueDateResult.dateObj < invDateResult.dateObj) {\n    errors.push(`Date inconsistency: due_date (${dueDateResult.formatted}) is earlier than invoice_date (${invDateResult.formatted}).`);\n  }\n}\n\nconst ROUNDING_TOLERANCE = 0.05;\nif (subtotal !== null && vatRate !== null && vatAmount !== null) {\n  const expectedVat = Math.round(subtotal * (vatRate / 100) * 100) / 100;\n  const diff = Math.abs(expectedVat - vatAmount);\n  if (diff > ROUNDING_TOLERANCE) {\n    errors.push(`VAT calculation mismatch: expected ~${expectedVat.toFixed(2)} (${vatRate}% of ${subtotal.toFixed(2)}), but found ${vatAmount.toFixed(2)} (diff: ${diff.toFixed(2)}).`);\n  }\n}\n\nif (subtotal !== null && totalAmount !== null) {\n  const actualVat = vatAmount !== null ? vatAmount : 0;\n  const expectedTotal = Math.round((subtotal + actualVat) * 100) / 100;\n  const totalDiff = Math.abs(expectedTotal - totalAmount);\n  if (totalDiff > ROUNDING_TOLERANCE) {\n    errors.push(`Total calculation mismatch: expected ~${expectedTotal.toFixed(2)} (subtotal ${subtotal.toFixed(2)} + VAT ${actualVat.toFixed(2)}), but found ${totalAmount.toFixed(2)} (diff: ${totalDiff.toFixed(2)}).`);\n  }\n}\n\nconst isValid = errors.length === 0;\nconst validationStatus = isValid ? (warnings.length > 0 ? 'PASSED_WITH_WARNINGS' : 'PASSED') : 'FAILED_CHECKS';\n\nconst validationSummary = isValid\n  ? `[VALIDATION PASSED] All required fields, calculations (VAT and Total), and dates verified successfully.${warnings.length > 0 ? ' Warnings: ' + warnings.join('; ') : ''}`\n  : `[VALIDATION FAILED] Encountered ${errors.length} error(s): ${errors.join('; ')}.${warnings.length > 0 ? ' Warnings: ' + warnings.join('; ') : ''}`;\n\nconst formattedLineItems = formatLineItems(data.line_items);\n\nreturn {\n  json: {\n    invoice_number: data.invoice_number ? String(data.invoice_number).trim() : null,\n    invoice_date: invDateResult.formatted || data.invoice_date,\n    due_date: dueDateResult.formatted || data.due_date || null,\n    vendor_name: data.vendor_name ? String(data.vendor_name).trim() : null,\n    vendor_vat_id: data.vendor_vat_id ? String(data.vendor_vat_id).trim() : null,\n    customer_name: data.customer_name ? String(data.customer_name).trim() : null,\n    customer_vat_id: data.customer_vat_id ? String(data.customer_vat_id).trim() : null,\n    line_items: formattedLineItems,\n    line_items_raw: data.line_items || null,\n    subtotal: subtotal !== null ? subtotal : data.subtotal,\n    vat_rate: vatRate !== null ? vatRate : data.vat_rate,\n    vat_amount: vatAmount !== null ? vatAmount : data.vat_amount,\n    total_amount: totalAmount !== null ? totalAmount : data.total_amount,\n    currency: data.currency ? String(data.currency).trim().toUpperCase() : null,\n    iban: data.iban ? String(data.iban).trim() : null,\n    payment_terms: data.payment_terms || null,\n    is_valid: isValid,\n    validation_status: validationStatus,\n    validation_errors: errors,\n    validation_warnings: warnings,\n    validation_summary: validationSummary\n  }\n};"
-      },
-      "id": "11392f07-8194-4a38-bfa1-d49db4d40577",
-      "name": "Validate Invoice Data",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1024,
-        0
-      ]
-    },
-    {
-      "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
@@ -412,6 +378,26 @@
     },
     {
       "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        240
+      ],
+      "id": "d379ef0a-99df-4c1a-9277-40413e696fa1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "modelId": {
           "__rl": true,
           "value": "models/gemini-3-flash-preview",
@@ -480,6 +466,69 @@
       ],
       "id": "6b4903a3-2789-438b-aae9-7598505ddd0d",
       "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawItem = $input.item.json;\nconst data = (rawItem && typeof rawItem.output === 'object' && rawItem.output !== null)\n  ? rawItem.output\n  : (rawItem || {});\n\nfunction parseNumber(val) {\n  if (typeof val === 'number') return val;\n  if (!val) return null;\n  const cleanStr = String(val).replace(/[^0-9.-]+/g, '');\n  const num = parseFloat(cleanStr);\n  return isNaN(num) ? null : num;\n}\n\nfunction parseAndNormalizeDate(dateStr) {\n  if (!dateStr || typeof dateStr !== 'string') return { valid: false, formatted: null, dateObj: null };\n  const trimmed = dateStr.trim();\n  \n  const dmyMatch = trimmed.match(/^(\\d{1,2})[./-](\\d{1,2})[./-](\\d{4})$/);\n  if (dmyMatch) {\n    const day = parseInt(dmyMatch[1], 10);\n    const month = parseInt(dmyMatch[2], 10);\n    const year = parseInt(dmyMatch[3], 10);\n    const d = new Date(year, month - 1, day);\n    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {\n      const formatted = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;\n      return { valid: true, formatted, dateObj: d };\n    }\n  }\n\n  const ymdMatch = trimmed.match(/^(\\d{4})[./-](\\d{1,2})[./-](\\d{1,2})$/);\n  if (ymdMatch) {\n    const year = parseInt(ymdMatch[1], 10);\n    const month = parseInt(ymdMatch[2], 10);\n    const day = parseInt(ymdMatch[3], 10);\n    const d = new Date(year, month - 1, day);\n    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {\n      const formatted = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;\n      return { valid: true, formatted, dateObj: d };\n    }\n  }\n\n  const parsed = new Date(trimmed);\n  if (!isNaN(parsed.getTime())) {\n    const day = String(parsed.getDate()).padStart(2, '0');\n    const month = String(parsed.getMonth() + 1).padStart(2, '0');\n    const year = parsed.getFullYear();\n    return { valid: true, formatted: `${day}.${month}.${year}`, dateObj: parsed };\n  }\n\n  return { valid: false, formatted: trimmed, dateObj: null };\n}\n\nfunction formatLineItems(items) {\n  if (!items) return '';\n  let parsed = items;\n  if (typeof items === 'string') {\n    try {\n      parsed = JSON.parse(items);\n    } catch (e) {\n      return items.trim();\n    }\n  }\n  if (Array.isArray(parsed)) {\n    return parsed.map(item => {\n      const desc = item.description || item.name || item.item || 'Item';\n      const qty = item.quantity !== undefined ? item.quantity : item.qty;\n      const unitPrice = item.unit_price !== undefined ? item.unit_price : item.price;\n      const total = item.total !== undefined ? item.total : item.amount;\n      \n      let part = desc;\n      if (qty !== undefined && unitPrice !== undefined) {\n        part += ` (${qty}x ${unitPrice})`;\n      } else if (qty !== undefined) {\n        part += ` (Qty: ${qty})`;\n      }\n      if (total !== undefined) {\n        part += ` = ${total}`;\n      }\n      return part;\n    }).join('; ');\n  }\n  return String(items);\n}\n\nconst errors = [];\nconst warnings = [];\n\nif (!data.invoice_number || String(data.invoice_number).trim() === '') {\n  errors.push('Missing or empty required field: invoice_number');\n}\n\nconst invDateResult = parseAndNormalizeDate(data.invoice_date);\nif (!invDateResult.valid) {\n  errors.push(`Invalid or missing invoice_date: \"${data.invoice_date}\". Expected valid date.`);\n}\n\nif (!data.vendor_name || String(data.vendor_name).trim() === '') {\n  errors.push('Missing or empty required field: vendor_name');\n}\nif (!data.customer_name || String(data.customer_name).trim() === '') {\n  warnings.push('Missing customer_name');\n}\nif (!data.currency || String(data.currency).trim() === '') {\n  errors.push('Missing currency code');\n}\n\nconst subtotal = parseNumber(data.subtotal);\nconst vatRate = parseNumber(data.vat_rate);\nconst vatAmount = parseNumber(data.vat_amount);\nconst totalAmount = parseNumber(data.total_amount);\n\nif (totalAmount === null || totalAmount <= 0) {\n  errors.push(`Invalid total_amount: \"${data.total_amount}\". Must be a positive number.`);\n}\nif (subtotal === null || subtotal <= 0) {\n  errors.push(`Invalid subtotal: \"${data.subtotal}\". Must be a positive number.`);\n}\nif (vatAmount === null && vatRate !== null && vatRate > 0) {\n  errors.push('Missing vat_amount when vat_rate is specified.');\n}\n\nlet dueDateResult = { valid: false, formatted: null, dateObj: null };\nif (data.due_date) {\n  dueDateResult = parseAndNormalizeDate(data.due_date);\n  if (!dueDateResult.valid) {\n    warnings.push(`due_date \"${data.due_date}\" could not be validated.`);\n  } else if (invDateResult.valid && dueDateResult.dateObj < invDateResult.dateObj) {\n    errors.push(`Date inconsistency: due_date (${dueDateResult.formatted}) is earlier than invoice_date (${invDateResult.formatted}).`);\n  }\n}\n\nconst ROUNDING_TOLERANCE = 0.05;\nif (subtotal !== null && vatRate !== null && vatAmount !== null) {\n  const expectedVat = Math.round(subtotal * (vatRate / 100) * 100) / 100;\n  const diff = Math.abs(expectedVat - vatAmount);\n  if (diff > ROUNDING_TOLERANCE) {\n    errors.push(`VAT calculation mismatch: expected ~${expectedVat.toFixed(2)} (${vatRate}% of ${subtotal.toFixed(2)}), but found ${vatAmount.toFixed(2)} (diff: ${diff.toFixed(2)}).`);\n  }\n}\n\nif (subtotal !== null && totalAmount !== null) {\n  const actualVat = vatAmount !== null ? vatAmount : 0;\n  const expectedTotal = Math.round((subtotal + actualVat) * 100) / 100;\n  const totalDiff = Math.abs(expectedTotal - totalAmount);\n  if (totalDiff > ROUNDING_TOLERANCE) {\n    errors.push(`Total calculation mismatch: expected ~${expectedTotal.toFixed(2)} (subtotal ${subtotal.toFixed(2)} + VAT ${actualVat.toFixed(2)}), but found ${totalAmount.toFixed(2)} (diff: ${totalDiff.toFixed(2)}).`);\n  }\n}\n\nconst isValid = errors.length === 0;\nconst validationStatus = isValid ? (warnings.length > 0 ? 'PASSED_WITH_WARNINGS' : 'PASSED') : 'FAILED_CHECKS';\n\nconst validationSummary = isValid\n  ? `[VALIDATION PASSED] All required fields, calculations (VAT and Total), and dates verified successfully.${warnings.length > 0 ? ' Warnings: ' + warnings.join('; ') : ''}`\n  : `[VALIDATION FAILED] Encountered ${errors.length} error(s): ${errors.join('; ')}.${warnings.length > 0 ? ' Warnings: ' + warnings.join('; ') : ''}`;\n\nconst formattedLineItems = formatLineItems(data.line_items);\n\nreturn {\n  json: {\n    invoice_number: data.invoice_number ? String(data.invoice_number).trim() : null,\n    invoice_date: invDateResult.formatted || data.invoice_date,\n    due_date: dueDateResult.formatted || data.due_date || null,\n    vendor_name: data.vendor_name ? String(data.vendor_name).trim() : null,\n    vendor_vat_id: data.vendor_vat_id ? String(data.vendor_vat_id).trim() : null,\n    customer_name: data.customer_name ? String(data.customer_name).trim() : null,\n    customer_vat_id: data.customer_vat_id ? String(data.customer_vat_id).trim() : null,\n    line_items: formattedLineItems,\n    line_items_raw: data.line_items || null,\n    subtotal: subtotal !== null ? subtotal : data.subtotal,\n    vat_rate: vatRate !== null ? vatRate : data.vat_rate,\n    vat_amount: vatAmount !== null ? vatAmount : data.vat_amount,\n    total_amount: totalAmount !== null ? totalAmount : data.total_amount,\n    currency: data.currency ? String(data.currency).trim().toUpperCase() : null,\n    iban: data.iban ? String(data.iban).trim() : null,\n    payment_terms: data.payment_terms || null,\n    is_valid: isValid,\n    validation_status: validationStatus,\n    validation_errors: errors,\n    validation_warnings: warnings,\n    validation_summary: validationSummary\n  }\n};"
+      },
+      "id": "11392f07-8194-4a38-bfa1-d49db4d40577",
+      "name": "Validate Invoice Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        0
+      ]
+    },
+    {
+      "id": "0b9ae5fb-59f3-40f9-9ef2-b4abdbf13dad",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        160
+      ],
+      "parameters": {
+        "filters": {
+          "q": "has:attachment filename:pdf -from:me",
+          "readStatus": "unread"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        },
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2LGeD9wQmN27eflB",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "626584ed-7496-44cc-b24d-ddc21595f66e",
+      "name": "Prepare Email Attachment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        160
+      ],
+      "parameters": {
+        "jsCode": "// Normalize Email Attachment to standard binary property 'data'\nconst binary = $input.item.binary || {};\nconst keys = Object.keys(binary);\n\nif (keys.length === 0) {\n  throw new Error('Incoming email has no downloadable attachment.');\n}\n\n// Locate the PDF attachment or fallback to first available binary\nconst pdfKey = keys.find(k => binary[k].mimeType === 'application/pdf' || binary[k].fileName?.toLowerCase().endsWith('.pdf')) || keys[0];\n\nreturn {\n  json: {\n    ...($input.item.json || {}),\n    intake_source: 'gmail',\n    attachment_filename: binary[pdfKey]?.fileName || 'invoice.pdf'\n  },\n  binary: {\n    data: binary[pdfKey]\n  }\n};",
+        "language": "javaScript",
+        "mode": "runOnceForEachItem"
+      }
     },
     {
       "id": "668b3589-283e-4de9-910b-753c755516d6",
@@ -695,11 +744,11 @@
         ]
       ]
     },
-    "Information Extractor": {
+    "Append row in sheet": {
       "main": [
         [
           {
-            "node": "Validate Invoice Data",
+            "node": "Message a model",
             "type": "main",
             "index": 0
           }
@@ -712,28 +761,6 @@
           {
             "node": "Information Extractor",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Validate Invoice Data": {
-      "main": [
-        [
-          {
-            "node": "Check Existing Invoice",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Append row in sheet": {
-      "main": [
-        [
-          {
-            "node": "Message a model",
-            "type": "main",
             "index": 0
           }
         ]
@@ -755,6 +782,50 @@
         [
           {
             "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Validate Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Attachment": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Invoice",
             "type": "main",
             "index": 0
           }
