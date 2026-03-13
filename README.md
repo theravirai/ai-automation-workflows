@@ -14,7 +14,8 @@ A curated collection of production-grade **AI automation workflows**, autonomous
 | # | Project | Tech Stack | Description | Status |
 | :-: | :--- | :--- | :--- | :-: |
 | **01** | [**AI-Powered Customer Support Automation**](01-ai-powered-customer-support-automation/) | `n8n`, `Groq (Llama-3)`, `Pinecone RAG`, `Gemini`, `Gmail`, `Slack` | Autonomous inbound email triage, zero-shot intent routing, RAG-grounded customer support resolution, and real-time Slack escalation alerting. | ✅ Production Ready |
-| **02** | *Upcoming Workflow* | `n8n`, `LangChain`, `Webhooks` | *In development* | ⏳ Queued |
+| **02** | [**AI Invoice Processing Pipeline**](02-ai-invoice-processing-pipeline/) | `n8n`, `Google Gemini (Flash)`, `Google Drive`, `Google Sheets`, `Gmail`, `JavaScript` | Automated enterprise invoice intake, multimodal PDF text extraction, structured Gemini Information Extractor, deterministic mathematical & date validation, Google Sheets ledger recording, and executive HTML email dispatch. | ✅ Production Ready |
+| **03** | *Upcoming Workflow* | `n8n`, `LangChain`, `Webhooks` | *In development* | ⏳ Queued |
 
 ---
 
