@@ -3,7 +3,19 @@
   "nodes": [
     {
       "parameters": {
-        "inputSource": "passthrough"
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "city"
+            },
+            {
+              "name": "country_code"
+            },
+            {
+              "name": "units"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.2,
@@ -16,39 +28,51 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
             {
-              "id": "9f032bec-f50c-45a0-8d85-1d4de5dd9ac0",
-              "name": "query",
-              "value": "={{ $json.query }}",
-              "type": "string"
+              "id": "city-not-empty",
+              "leftValue": "={{ $json.city }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              },
+              "rightValue": ""
             }
-          ]
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
+      "id": "e71d33e9-cd8a-4f79-a2ad-310c0c827e2d",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
         224,
         0
-      ],
-      "id": "147c7e9c-b96e-4d18-941d-189f4308b7bd",
-      "name": "Edit Fields"
+      ]
     },
     {
       "parameters": {
-        "cityName": "={{ $json.query }}"
+        "format": "={{ $json.units === 'imperial' ? 'imperial' : 'metric' }}",
+        "cityName": "={{ $json.country_code ? `${$json.city.trim()},${$json.country_code.trim()}` : $json.city.trim() }}"
       },
       "type": "n8n-nodes-base.openWeatherMap",
       "typeVersion": 1,
       "position": [
         448,
-        0
+        -96
       ],
       "id": "17255a99-5a8d-4137-996e-374e14dc0dda",
       "name": "OpenWeatherMap",
+      "onError": "continueRegularOutput",
       "credentials": {
         "openWeatherMapApi": {
           "id": "saatTOUOgfGt6kA5",
@@ -58,68 +82,45 @@
     },
     {
       "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-3.1-flash-lite",
-          "mode": "list",
-          "cachedResultName": "models/gemini-3.1-flash-lite"
-        },
-        "messages": {
-          "values": [
-            {}
+        "assignments": {
+          "assignments": [
+            {
+              "id": "err-success",
+              "name": "success",
+              "type": "boolean",
+              "value": false
+            },
+            {
+              "id": "err-msg",
+              "name": "error",
+              "type": "string",
+              "value": "City name is required and cannot be empty."
+            }
           ]
         },
-        "builtInTools": {},
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1.2,
+      "id": "30b519a3-a88b-4267-a478-2408a6c5e543",
+      "name": "Missing City Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
       "position": [
-        672,
-        0
-      ],
-      "id": "56ab10fb-f6b7-4198-b060-50e5b486e002",
-      "name": "Message a model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "mlDGlX2lonl50RGr",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+        448,
+        96
+      ]
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "fbeda1ac-662a-43cd-be0b-0fd29162e4bd",
-              "leftValue": "",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
+        "jsCode": "const item = $input.first().json;\nconst triggerData = $('When Executed by Another Workflow').first().json;\nconst units = triggerData.units === 'imperial' ? 'imperial' : 'metric';\n\nif (item.error || item.message || !item.main) {\n  return [{\n    json: {\n      success: false,\n      error: item.message || item.error || 'Failed to retrieve weather data for the specified location.'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: true,\n    city: item.name,\n    country: item.sys?.country || null,\n    temperature: item.main.temp,\n    feels_like: item.main.feels_like,\n    humidity: item.main.humidity,\n    condition: item.weather?.[0]?.description || item.weather?.[0]?.main || 'Unknown',\n    wind_speed: item.wind?.speed ?? 0,\n    units: units\n  }\n}];"
       },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
+      "id": "3d53783a-2f14-41bb-93f3-2c626281f073",
+      "name": "Normalize Weather Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        1040,
-        0
-      ],
-      "id": "53da80f2-c7b9-41c9-bef5-d4835272d71c",
-      "name": "Filter"
+        672,
+        -96
+      ]
     }
   ],
   "connections": {
@@ -127,18 +128,25 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Validate Input",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Edit Fields": {
+    "Validate Input": {
       "main": [
         [
           {
             "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Missing City Error",
             "type": "main",
             "index": 0
           }
@@ -149,18 +157,7 @@
       "main": [
         [
           {
-            "node": "Message a model",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Message a model": {
-      "main": [
-        [
-          {
-            "node": "Filter",
+            "node": "Normalize Weather Response",
             "type": "main",
             "index": 0
           }
