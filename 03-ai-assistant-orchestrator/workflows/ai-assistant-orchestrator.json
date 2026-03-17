@@ -17,6 +17,7 @@
     },
     {
       "parameters": {
+        "needsFallback": true,
         "options": {
           "systemMessage": "You are a helpful assistant."
         }
@@ -49,6 +50,39 @@
           "name": "Groq account"
         }
       }
+    },
+    {
+      "parameters": {
+        "model": "mistral-medium-3.5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        320,
+        192
+      ],
+      "id": "4b963dc2-f749-4b3f-9ec0-c0751dda7d39",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "6FvGaB3MOkLew5AN",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        488,
+        184
+      ],
+      "id": "914a2f5e-3aab-43d4-98aa-350191554920",
+      "name": "Simple Memory"
     }
   ],
   "connections": {
@@ -69,6 +103,28 @@
           {
             "node": "AI Agent",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
             "index": 0
           }
         ]
