@@ -19,7 +19,7 @@
       "parameters": {
         "needsFallback": true,
         "options": {
-          "systemMessage": "You are a helpful assistant."
+          "systemMessage": "You are a helpful assistant.\nTools:\nUse Weather tool to fetch latest weather information."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -83,6 +83,56 @@
       ],
       "id": "914a2f5e-3aab-43d4-98aa-350191554920",
       "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "You can call this too in case you need to know about weather.",
+        "workflowId": {
+          "__rl": true,
+          "value": "6fKOAXSrJoRHtx50",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/6fKOAXSrJoRHtx50",
+          "cachedResultName": "Weather Information Tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        616,
+        184
+      ],
+      "id": "80eedc57-ddf0-4c03-8302-ff86a7fc6904",
+      "name": "Weather"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        744,
+        184
+      ],
+      "id": "b034413d-468b-4ea7-a09c-a70fc943b75c",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        872,
+        184
+      ],
+      "id": "37cdfcf3-63bb-48ac-be17-691133c1f5ce",
+      "name": "Think"
     }
   ],
   "connections": {
@@ -125,6 +175,39 @@
           {
             "node": "AI Agent",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
             "index": 0
           }
         ]
