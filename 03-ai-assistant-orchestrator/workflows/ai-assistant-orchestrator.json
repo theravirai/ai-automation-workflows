@@ -133,6 +133,20 @@
       ],
       "id": "37cdfcf3-63bb-48ac-be17-691133c1f5ce",
       "name": "Think"
+    },
+    {
+      "parameters": {
+        "url": "https://api.frankfurter.dev/v2/rate/{{from}}/{{to}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        1216,
+        176
+      ],
+      "id": "15eb541c-3364-45ae-a7d8-d0f4ef63a975",
+      "name": "HTTP Request"
     }
   ],
   "connections": {
@@ -203,6 +217,17 @@
       ]
     },
     "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
       "ai_tool": [
         [
           {
