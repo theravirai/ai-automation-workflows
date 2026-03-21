@@ -17,6 +17,8 @@
     },
     {
       "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
         "needsFallback": true,
         "options": {
           "systemMessage": "You are a helpful assistant.\nTools:\nUse Weather tool to fetch latest weather information."
@@ -86,19 +88,54 @@
     },
     {
       "parameters": {
-        "description": "You can call this too in case you need to know about weather.",
+        "description": "Get current weather information for a specific city or location.",
         "workflowId": {
           "__rl": true,
-          "value": "6fKOAXSrJoRHtx50",
-          "mode": "list",
+          "cachedResultName": "Weather Information Tool",
           "cachedResultUrl": "/workflow/6fKOAXSrJoRHtx50",
-          "cachedResultName": "Weather Information Tool"
+          "mode": "list",
+          "value": "6fKOAXSrJoRHtx50"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
-          "value": {},
+          "value": {
+            "city": "={{ $fromAI('city', 'The name of the city, e.g. London or Tokyo', 'string') }}",
+            "country_code": "={{ $fromAI('country_code', 'Optional two-letter ISO country code, e.g. US, GB, FR', 'string') }}",
+            "units": "={{ $fromAI('units', 'Units of measurement: metric or imperial (default: metric)', 'string') }}"
+          },
           "matchingColumns": [],
-          "schema": [],
+          "schema": [
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "country_code",
+              "displayName": "country_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "units",
+              "displayName": "units",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         }
@@ -113,7 +150,9 @@
       "name": "Weather"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "description": "Perform arithmetic and numerical calculations."
+      },
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
@@ -124,7 +163,9 @@
       "name": "Calculator"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "description": "Use for complex reasoning, multi-step planning, or problem breakdown before acting."
+      },
       "type": "@n8n/n8n-nodes-langchain.toolThink",
       "typeVersion": 1.1,
       "position": [
@@ -136,7 +177,28 @@
     },
     {
       "parameters": {
-        "url": "https://api.frankfurter.dev/v2/rate/{{from}}/{{to}}",
+        "query": "={{ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        184
+      ],
+      "id": "1f2eacc8-0935-4156-84b2-0e19ce9ddbb8",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "6ZnrzjYLR3v1qf5C",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Get current currency exchange rates and convert between currencies (e.g. USD, EUR, GBP, JPY). Always use this tool for exchange rate queries and currency conversions.",
+        "url": "={{ `https://api.frankfurter.dev/v2/rate/${$fromAI('from_currency', 'Three-letter currency code to convert from, e.g. USD, EUR, GBP', 'string').toUpperCase().trim()}/${$fromAI('to_currency', 'Three-letter currency code to convert to, e.g. EUR, USD, JPY', 'string').toUpperCase().trim()}` }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
@@ -146,7 +208,7 @@
         176
       ],
       "id": "15eb541c-3364-45ae-a7d8-d0f4ef63a975",
-      "name": "HTTP Request"
+      "name": "Currency Exchange Rates"
     }
   ],
   "connections": {
@@ -227,7 +289,18 @@
         ]
       ]
     },
-    "HTTP Request": {
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Currency Exchange Rates": {
       "ai_tool": [
         [
           {
