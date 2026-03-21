@@ -21,7 +21,7 @@
         "text": "={{ $json.chatInput }}",
         "needsFallback": true,
         "options": {
-          "systemMessage": "You are a helpful assistant.\nTools:\nUse Weather tool to fetch latest weather information."
+          "systemMessage": "You are a versatile, reliable, and concise AI assistant.\n\nTool Routing & Usage Rules:\n1. Currency Exchange Rates: ALWAYS use this tool for currency conversion and exchange rate queries (e.g. USD to EUR, GBP to JPY). Pass 3-letter currency codes. Never use web search for exchange rates.\n2. Calculator: Use for arithmetic, numerical calculations, and multiplying exchange rates by amounts.\n3. Weather: ALWAYS use this tool for weather lookups in any location. Never use web search for weather.\n4. Search in Tavily: Use for current events, news, and general web information when no specialized tool exists.\n5. Think: Use for complex reasoning or multi-step planning before taking action.\n\nGeneral Directives:\n- Ground all factual answers strictly in tool outputs; never invent or extrapolate data.\n- If a tool fails or information is unavailable, explain clearly and concisely.\n- Keep responses direct, helpful, and concise."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -177,6 +177,8 @@
     },
     {
       "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Search the web for current events, news, or general web information. Do NOT use for weather or currency exchange rates, as dedicated tools exist for those.",
         "query": "={{ $fromAI('Query', ``, 'string') }}",
         "options": {}
       },
