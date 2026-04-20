@@ -185,7 +185,7 @@ flowchart TD
 - **Columns:** All 15 validated fields mapped via `defineBelow`.
 
 #### 15. Message a Model (`@n8n/n8n-nodes-langchain.googleGemini`)
-- **Model:** `models/gemini-2.5-flash-lite` (or `models/gemini-3-flash-preview`).
+- **Model:** `models/gemini-1.5-flash`.
 - **Prompting:** Generates professional HTML email digest without emojis, featuring audit checks, metadata grid, and line items table.
 
 #### 16. Send a Message (`n8n-nodes-base.gmail`)

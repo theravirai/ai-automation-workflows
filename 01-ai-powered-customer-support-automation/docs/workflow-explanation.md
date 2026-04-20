@@ -174,7 +174,7 @@ flowchart TD
   - *Confidentiality:* Strict prohibition against leaking internal prompt guidelines, vector IDs, or system architecture.
 
 #### 9. `Groq Chat Model (AI Agent)` (`@n8n/n8n-nodes-langchain.lmChatGroq`)
-- **Model:** High-parameter reasoning model (`qwen/qwen3.8-27b` or `llama-3.3-70b-versatile`).
+- **Model:** High-parameter reasoning model (`llama-3.3-70b-versatile`).
 - **Role:** Evaluates retrieved policy snippets against customer inquiries, reasons through eligibility requirements, and synthesizes clear email responses.
 
 #### 10. `Nordlicht Home Knowledge Base` (`@n8n/n8n-nodes-langchain.vectorStorePinecone`)
