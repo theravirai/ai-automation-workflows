@@ -1,0 +1,31 @@
+{
+  "name": "MCP Server",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "da3c8692-77ca-4c36-b912-568660a1983d"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "b66e72f5-8c02-4ae9-ae64-2a90a2c239b3",
+      "name": "MCP Server Trigger",
+      "webhookId": "da3c8692-77ca-4c36-b912-568660a1983d"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  }
+}
