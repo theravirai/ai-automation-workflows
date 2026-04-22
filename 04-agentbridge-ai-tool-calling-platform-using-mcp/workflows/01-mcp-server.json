@@ -14,9 +14,54 @@
       "id": "b66e72f5-8c02-4ae9-ae64-2a90a2c239b3",
       "name": "MCP Server Trigger",
       "webhookId": "da3c8692-77ca-4c36-b912-568660a1983d"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        176
+      ],
+      "id": "6024ee82-f322-4f5d-b406-c93eeebc8236",
+      "name": "Calculator Tool"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        32,
+        256
+      ],
+      "id": "09464d7d-37fb-4679-b0e5-3da3b3fe340c",
+      "name": "Wikipedia Knowledge Tool"
     }
   ],
-  "connections": {},
+  "connections": {
+    "Calculator Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia Knowledge Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
