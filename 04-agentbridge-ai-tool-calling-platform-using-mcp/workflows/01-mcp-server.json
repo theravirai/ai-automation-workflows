@@ -36,6 +36,24 @@
       ],
       "id": "09464d7d-37fb-4679-b0e5-3da3b3fe340c",
       "name": "Wikipedia Knowledge Tool"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve the current date, time, and day of the week in a specified timezone. Useful for resolving relative dates like 'today', 'tomorrow', or 'next Monday'.",
+        "options": {
+          "includeInputFields": false,
+          "timezone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('timezone', 'Optional IANA timezone name (e.g. UTC, America/New_York, Europe/London, Asia/Tokyo). Defaults to UTC.', 'string', 'UTC') }}"
+        }
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        192,
+        272
+      ],
+      "id": "d552abdb-e73a-4ac1-a96b-b38bd088781a",
+      "name": "Date & Time Utility Tool"
     }
   ],
   "connections": {
@@ -51,6 +69,17 @@
       ]
     },
     "Wikipedia Knowledge Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time Utility Tool": {
       "ai_tool": [
         [
           {
