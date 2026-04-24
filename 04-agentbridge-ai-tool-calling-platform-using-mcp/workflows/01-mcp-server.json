@@ -54,6 +54,28 @@
       ],
       "id": "d552abdb-e73a-4ac1-a96b-b38bd088781a",
       "name": "Date & Time Utility Tool"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve real-time weather conditions (temperature, weather summary, humidity, wind speed) for any city worldwide. Specify the city name and an optional 2-letter country code.",
+        "cityName": "={{ $fromAI('country_code', 'Optional two-letter ISO country code (e.g. US, GB, DE, FR) to disambiguate the city location', 'string', '') ? ($fromAI('city', 'The name of the city (e.g. London, Tokyo, San Francisco)', 'string') + ',' + $fromAI('country_code', 'Optional two-letter ISO country code (e.g. US, GB, DE, FR) to disambiguate the city location', 'string', '')) : $fromAI('city', 'The name of the city (e.g. London, Tokyo, San Francisco)', 'string') }}",
+        "language": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('language', 'Optional two-letter language code for weather descriptions (e.g. en, es, fr, de). Defaults to en.', 'string', 'en') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        368,
+        272
+      ],
+      "id": "8d089596-64ce-482f-a696-e9e85de5a896",
+      "name": "Weather Service Tool",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "saatTOUOgfGt6kA5",
+          "name": "OpenWeatherMap account"
+        }
+      }
     }
   ],
   "connections": {
@@ -80,6 +102,17 @@
       ]
     },
     "Date & Time Utility Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Service Tool": {
       "ai_tool": [
         [
           {
