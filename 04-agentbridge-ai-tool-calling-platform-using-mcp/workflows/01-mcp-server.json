@@ -76,6 +76,23 @@
           "name": "OpenWeatherMap account"
         }
       }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Convert an amount from one fiat currency to another using real-time foreign exchange rates via Frankfurter. Requires from_currency (3-letter code), to_currency (3-letter code), and optional amount (defaults to 1).",
+        "url": "=https://api.frankfurter.dev/v1/latest?amount={{ $fromAI('amount', 'The numeric amount of money to convert. Defaults to 1.', 'number', 1) }}&base={{ $fromAI('from_currency', 'Three-letter currency code to convert from (e.g. USD, EUR, GBP)', 'string').toUpperCase().trim() }}&symbols={{ $fromAI('to_currency', 'Three-letter currency code to convert to (e.g. EUR, USD, JPY)', 'string').toUpperCase().trim() }}",
+        "options": {
+          "response": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        272
+      ],
+      "id": "7afa4835-630c-4c96-8316-15ff934a7b2d",
+      "name": "Currency Exchange Rates Tool"
     }
   ],
   "connections": {
@@ -113,6 +130,17 @@
       ]
     },
     "Weather Service Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Currency Exchange Rates Tool": {
       "ai_tool": [
         [
           {
