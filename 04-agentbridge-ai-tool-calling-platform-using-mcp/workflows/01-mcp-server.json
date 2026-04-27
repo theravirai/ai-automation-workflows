@@ -93,6 +93,36 @@
       ],
       "id": "7afa4835-630c-4c96-8316-15ff934a7b2d",
       "name": "Currency Exchange Rates Tool"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Post a notification or message to a designated Slack channel. Supports standard Slack markdown formatting.",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $fromAI('channel', 'The Slack channel ID or name (e.g., C0C2D0HHQ8L or ai-support-automation). Defaults to C0C2D0HHQ8L.', 'string', 'C0C2D0HHQ8L') }}",
+          "mode": "id",
+          "cachedResultName": "ai-support-automation"
+        },
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'The text content of the message to send to Slack. Supports standard Slack markdown formatting.', 'string') }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slackTool",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        272
+      ],
+      "id": "7fd86dbd-fdec-4495-a60c-094d0b3a8e63",
+      "name": "Slack Messenger Tool",
+      "webhookId": "2c43eaa4-779a-41b8-ab0e-d0fbb4639c1f",
+      "credentials": {
+        "slackApi": {
+          "id": "3XZaOaDRSah7Xxxy",
+          "name": "Slack account 2"
+        }
+      }
     }
   ],
   "connections": {
@@ -141,6 +171,17 @@
       ]
     },
     "Currency Exchange Rates Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Messenger Tool": {
       "ai_tool": [
         [
           {
