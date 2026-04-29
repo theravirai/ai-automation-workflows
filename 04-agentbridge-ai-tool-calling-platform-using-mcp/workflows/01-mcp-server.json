@@ -155,6 +155,34 @@
           "name": "Google Calendar account"
         }
       }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Insert a structured record into an n8n Data Table with title, category, data, and metadata fields.",
+        "dataTableId": {
+          "__rl": true,
+          "value": "={{ $fromAI('table_id', 'ID or name of the target Data Table', 'string') }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "f7ac6722-d242-456c-841f-a1dbdfa5f7ff",
+      "name": "Data Table Persistence Tool"
     }
   ],
   "connections": {
@@ -225,6 +253,17 @@
       ]
     },
     "Google Calendar Scheduler Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table Persistence Tool": {
       "ai_tool": [
         [
           {
