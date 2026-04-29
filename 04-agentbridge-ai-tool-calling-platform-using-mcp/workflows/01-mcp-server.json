@@ -123,6 +123,38 @@
           "name": "Slack account 2"
         }
       }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a new event in Google Calendar with title, start time, end time, optional description, and timezone.",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('calendar_id', 'Calendar identifier (e.g., primary or email address). Defaults to primary.', 'string', 'primary') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&\u2019*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "start": "={{ $fromAI('timezone', 'Optional IANA timezone (e.g. UTC, America/New_York, Europe/London). Defaults to UTC.', 'string', 'UTC') && $fromAI('start', 'Event start time in ISO 8601 format (e.g. 2026-10-01T14:00:00Z or with offset)', 'string') }}",
+        "end": "={{ $fromAI('end', 'Event end time in ISO 8601 format (e.g. 2026-10-01T15:00:00Z or with offset)', 'string') }}",
+        "additionalFields": {
+          "description": "={{ $fromAI('description', 'Optional detailed description, agenda, or notes for the calendar event', 'string', '') }}",
+          "summary": "={{ $fromAI('title', 'Title or headline summary of the calendar event', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        272
+      ],
+      "id": "9550da9b-d451-4104-aa8d-3e042d7950ce",
+      "name": "Google Calendar Scheduler Tool",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "pr6GgeMOxDhpOK8q",
+          "name": "Google Calendar account"
+        }
+      }
     }
   ],
   "connections": {
@@ -182,6 +214,17 @@
       ]
     },
     "Slack Messenger Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Scheduler Tool": {
       "ai_tool": [
         [
           {
