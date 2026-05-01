@@ -31,6 +31,35 @@
       ],
       "id": "b6d67091-2340-480f-bccb-91e480d9e073",
       "name": "AgentBridge Orchestrator"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/da3c8692-77ca-4c36-b912-568660a1983d",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        616,
+        232
+      ],
+      "id": "741bc1de-abb5-46fc-a337-85f6d768c361",
+      "name": "MCP Tool Bridge Client"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        240
+      ],
+      "id": "060294c8-c1a8-4f66-9482-a728f1a3efcc",
+      "name": "Conversation Window Memory"
     }
   ],
   "connections": {
@@ -40,6 +69,28 @@
           {
             "node": "AgentBridge Orchestrator",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Tool Bridge Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AgentBridge Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Window Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AgentBridge Orchestrator",
+            "type": "ai_memory",
             "index": 0
           }
         ]
