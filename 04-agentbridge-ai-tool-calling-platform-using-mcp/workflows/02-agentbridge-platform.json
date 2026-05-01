@@ -60,6 +60,52 @@
       ],
       "id": "060294c8-c1a8-4f66-9482-a728f1a3efcc",
       "name": "Conversation Window Memory"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {
+          "maxOutputTokens": 4096,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        240
+      ],
+      "id": "9475aa3c-2b84-4991-9437-cf957582c53d",
+      "name": "Gemini Fallback Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        128,
+        240
+      ],
+      "id": "9520ea8f-2631-4442-a200-b8678814eef8",
+      "name": "Groq Primary Model",
+      "credentials": {
+        "groqApi": {
+          "id": "B5zitr9thBGDx303",
+          "name": "Groq account"
+        }
+      }
     }
   ],
   "connections": {
@@ -91,6 +137,28 @@
           {
             "node": "AgentBridge Orchestrator",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Fallback Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgentBridge Orchestrator",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Groq Primary Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AgentBridge Orchestrator",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
