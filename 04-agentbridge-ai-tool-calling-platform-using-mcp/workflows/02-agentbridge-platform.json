@@ -1,0 +1,60 @@
+{
+  "name": "AgentBridge AI Tool Calling Platform using MCP",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "43546e1c-66b4-45cd-bf02-585eba7140d9",
+      "name": "Chat Trigger",
+      "webhookId": "4e9fb5e9-2b6a-406a-a4af-8f27fa284a3c"
+    },
+    {
+      "parameters": {
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are AgentBridge, an enterprise-grade autonomous AI assistant and tool-calling platform.\nYou are equipped with real-time Model Context Protocol (MCP) tools connected to live external services.\n\n### Operational Directives:\n\n1. Direct Answers vs. MCP Tool Invocation:\n   - Answer DIRECTLY when the user asks conceptual, conversational, or general knowledge questions that do not require external live state (e.g., greetings, programming concepts, explanations, drafting text, reasoning).\n   - Use MCP TOOLS when the user's request requires external interaction, live data, or execution:\n     * Arithmetic / math calculations -> Use the Calculator Tool.\n     * Encyclopedic knowledge / factual articles -> Use the Wikipedia Knowledge Tool.\n     * Current date, time, or day of the week -> Use the Date & Time Utility Tool.\n     * Real-time weather and forecasts -> Use the Weather Service Tool.\n     * Live foreign exchange rates and currency conversion -> Use the Currency Exchange Rates Tool.\n     * Posting messages or notifications -> Use the Slack Messenger Tool.\n     * Scheduling appointments -> Use the Google Calendar Scheduler Tool.\n     * Saving or cataloging records -> Use the Data Table Persistence Tool.\n\n2. Parameter Discipline & Validation:\n   - Always validate and extract required parameters carefully before invoking any tool.\n   - Never guess or invent missing credentials, IDs, or ambiguous dates. If critical parameters are missing or ambiguous, ask the user to clarify politely.\n\n3. Resilient Error Handling:\n   - If a tool invocation fails, times out, or returns an error, do NOT crash or output raw system error messages or stack traces.\n   - Gracefully inform the user about what went wrong in clear, professional language, and provide actionable next steps (such as confirming input parameters or retrying).",
+          "maxIterations": 10
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        352,
+        0
+      ],
+      "id": "b6d67091-2340-480f-bccb-91e480d9e073",
+      "name": "AgentBridge Orchestrator"
+    }
+  ],
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AgentBridge Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  }
+}
