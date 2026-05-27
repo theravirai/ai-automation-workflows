@@ -1,0 +1,250 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+7 0 obj
+<< /Length 2186 >>
+stream
+BT
+/F1 16 Tf
+50 740 Td
+(Enterprise AI Governance Policy) Tj
+ET
+BT
+/F2 10 Tf
+50 722 Td
+(Document Ref: KB-POL-2026-01  |  Page 1 of 2) Tj
+ET
+BT
+/F1 12 Tf
+50 690 Td
+(1. Executive Charter & Purpose) Tj
+ET
+BT
+/F2 9.5 Tf
+50 672 Td
+(The Enterprise AI Governance and Acceptable Use Policy establishes strict) Tj
+ET
+BT
+/F2 9.5 Tf
+50 658 Td
+(operational, security, and ethical boundaries for deploying Large Language Models) Tj
+ET
+BT
+/F2 9.5 Tf
+50 644 Td
+(\(LLMs\) and autonomous agent workflows within the organization.) Tj
+ET
+BT
+/F2 9.5 Tf
+50 630 Td
+(This policy applies to all engineering squads, business operations, and automated) Tj
+ET
+BT
+/F2 9.5 Tf
+50 616 Td
+(agent orchestrators operating across production and staging environments.) Tj
+ET
+BT
+/F1 12 Tf
+50 592 Td
+(2. Approved Model Registry & Deployment Tiers) Tj
+ET
+BT
+/F2 9.5 Tf
+50 574 Td
+(Production agent workflows are authorized to utilize models exclusively from the) Tj
+ET
+BT
+/F2 9.5 Tf
+50 560 Td
+(Enterprise Model Registry. Approved models include Groq LPU-accelerated) Tj
+ET
+BT
+/F2 9.5 Tf
+50 546 Td
+(checkpoints \(Llama-3.3-70B, Qwen-2.5-32B\), Google Gemini \(Gemini-1.5-Flash,) Tj
+ET
+BT
+/F2 9.5 Tf
+50 532 Td
+(Gemini-1.5-Pro\), and Claude 3.5 Sonnet.) Tj
+ET
+BT
+/F2 9.5 Tf
+50 518 Td
+(Experimental or unvetted open-source weights downloaded from public registries) Tj
+ET
+BT
+/F2 9.5 Tf
+50 504 Td
+(without InfoSec audit are strictly prohibited from processing company intellectual) Tj
+ET
+BT
+/F2 9.5 Tf
+50 490 Td
+(property.) Tj
+ET
+BT
+/F1 12 Tf
+50 466 Td
+(3. Data Classification & Strict PII Masking Standards) Tj
+ET
+BT
+/F2 9.5 Tf
+50 448 Td
+(All automated ingestion pipelines must apply deterministic token masking before) Tj
+ET
+BT
+/F2 9.5 Tf
+50 434 Td
+(vector embedding. Sensitive data categories including credit card numbers) Tj
+ET
+BT
+/F2 9.5 Tf
+50 420 Td
+(\(PCI-DSS\), Social Security Numbers, protected health information \(HIPAA\), and) Tj
+ET
+BT
+/F2 9.5 Tf
+50 406 Td
+(customer credentials must never enter vector indexes.) Tj
+ET
+BT
+/F2 9.5 Tf
+50 392 Td
+(Embeddings generated for vector storage must strictly utilize isolated,) Tj
+ET
+BT
+/F2 9.5 Tf
+50 378 Td
+(authorized tenant namespaces with TLS 1.3 in-flight encryption.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 1677 >>
+stream
+BT
+/F1 16 Tf
+50 740 Td
+(Enterprise AI Governance Policy) Tj
+ET
+BT
+/F2 10 Tf
+50 722 Td
+(Document Ref: KB-POL-2026-01  |  Page 2 of 2) Tj
+ET
+BT
+/F1 12 Tf
+50 690 Td
+(4. Grounding & Anti-Hallucination Controls \(RAG Architecture\)) Tj
+ET
+BT
+/F2 9.5 Tf
+50 672 Td
+(Retrieval-Augmented Generation \(RAG\) agents must enforce strict context bounding.) Tj
+ET
+BT
+/F2 9.5 Tf
+50 658 Td
+(System prompts must instruct models to synthesize answers solely from retrieved) Tj
+ET
+BT
+/F2 9.5 Tf
+50 644 Td
+(documentation.) Tj
+ET
+BT
+/F2 9.5 Tf
+50 630 Td
+(If the retrieval confidence score or similarity threshold falls below acceptable) Tj
+ET
+BT
+/F2 9.5 Tf
+50 616 Td
+(parameters, the agent is mandated to issue a standard insufficient-information) Tj
+ET
+BT
+/F2 9.5 Tf
+50 602 Td
+(disclaimer rather than attempting speculative completion.) Tj
+ET
+BT
+/F1 12 Tf
+50 578 Td
+(5. Human-in-the-Loop Escalation Protocols) Tj
+ET
+BT
+/F2 9.5 Tf
+50 560 Td
+(Autonomous customer-facing workflows must incorporate automated escalation) Tj
+ET
+BT
+/F2 9.5 Tf
+50 546 Td
+(thresholds. High-sentiment distress, contract termination requests, and high-value) Tj
+ET
+BT
+/F2 9.5 Tf
+50 532 Td
+(refund demands exceeding  USD must be immediately routed to certified human) Tj
+ET
+BT
+/F2 9.5 Tf
+50 518 Td
+(operators via Slack or CRM escalation tickets.) Tj
+ET
+BT
+/F1 12 Tf
+50 494 Td
+(6. Compliance Auditing & Log Retention) Tj
+ET
+BT
+/F2 9.5 Tf
+50 476 Td
+(Every agent inference call, prompt payload, tool invocation, and token) Tj
+ET
+BT
+/F2 9.5 Tf
+50 462 Td
+(utilization metric must be immutably recorded for a minimum of 365 days in) Tj
+ET
+BT
+/F2 9.5 Tf
+50 448 Td
+(compliance with SOC-2 Type II and ISO 27001 audit standards.) Tj
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000000393 00000 n 
+0000000468 00000 n 
+0000000538 00000 n 
+0000002776 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+4505
+%%EOF
