@@ -1,0 +1,157 @@
+{
+  "name": "KnowledgeBridge Enterprise RAG Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "KnowledgeBridge Document Ingestion",
+        "formDescription": "Secure enterprise portal for indexing knowledge documents (PDF, TXT, DOCX, Markdown) into the KnowledgeBridge vector database.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload File",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -608,
+        160
+      ],
+      "id": "a02d2466-303b-4e03-a240-02a18613308e",
+      "name": "Document Ingestion Form Trigger",
+      "webhookId": "76fc6438-a480-4ae1-b0d3-1480f2e4bdbc"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-n8n",
+          "mode": "list",
+          "cachedResultName": "rag-n8n"
+        },
+        "options": {
+          "pineconeNamespace": "enterprise-knowledge-base"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        160
+      ],
+      "id": "14db4493-d5da-407d-802b-20502761bccf",
+      "name": "Pinecone Vector Ingestion Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "7wBHOaH9kxmmQrj4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "=models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        368
+      ],
+      "id": "e4371301-adf8-43ec-af9f-066bc95d81e8",
+      "name": "Gemini Embedding Generator (Ingestion)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $binary.Upload_File.fileName || 'Untitled Document' }}"
+              },
+              {
+                "name": "source",
+                "value": "={{ $binary.Upload_File.fileName || 'Direct Upload' }}"
+              },
+              {
+                "name": "category",
+                "value": "enterprise_docs"
+              },
+              {
+                "name": "uploaded_at",
+                "value": "={{ $now.toISO() }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        368
+      ],
+      "id": "b9e178a5-b2f9-4f10-aee6-bd8391d80cf2",
+      "name": "Enterprise Document Parser & Chunker"
+    }
+  ],
+  "connections": {
+    "Document Ingestion Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Ingestion Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embedding Generator (Ingestion)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Ingestion Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enterprise Document Parser & Chunker": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Ingestion Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  }
+}
