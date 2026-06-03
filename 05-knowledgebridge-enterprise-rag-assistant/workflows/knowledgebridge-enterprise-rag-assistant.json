@@ -3,6 +3,70 @@
   "nodes": [
     {
       "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        96,
+        272
+      ],
+      "id": "2a7aed05-786b-4995-a3df-1796d68454b9",
+      "name": "Enterprise Chat Trigger",
+      "webhookId": "c2dfc316-f623-4da9-a80c-e1518146c8ca"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are KnowledgeBridge, an enterprise-grade AI Research & Knowledge Assistant.\n\n### MANDATORY TOOL USAGE RULES:\n1. You have access to a specialized tool: 'Enterprise_Knowledge_Base_Retriever'.\n2. For EVERY user question, you MUST ALWAYS call the 'Enterprise_Knowledge_Base_Retriever' tool FIRST before formulating any response.\n3. NEVER assume information is missing and NEVER say information was not found without calling 'Enterprise_Knowledge_Base_Retriever' first.\n\n### POST-RETRIEVAL GROUNDING RULES:\n1. Answer strictly using the retrieved excerpts provided by the tool. Never invent facts, policies, or numbers.\n2. Cite the source document title or filename from the metadata (e.g. [Source: <title>]).\n3. ONLY after the tool has returned zero results or no relevant excerpts may you state:\n   \"I could not find relevant information regarding your request in the enterprise knowledge base.\"",
+          "maxIterations": 10,
+          "tracingMetadata": {
+            "values": [
+              {
+                "key": "question",
+                "stringValue": "={{ $('Enterprise Chat Trigger').item.json.chatInput || $json.chatInput }}"
+              },
+              {
+                "key": "model",
+                "stringValue": "qwen/qwen3.8-27b"
+              },
+              {
+                "key": "timestamp",
+                "stringValue": "={{ $now.toISO() }}"
+              },
+              {
+                "key": "workflow",
+                "stringValue": "KnowledgeBridge Enterprise RAG Assistant"
+              }
+            ]
+          },
+          "autoSaveHighlightedData": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        64
+      ],
+      "id": "903483b0-b66e-4fb5-a06c-e8075a4bfe20",
+      "name": "KnowledgeBridge RAG Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        304
+      ],
+      "id": "48dce9c1-78fa-4204-b131-d7d343838bd8",
+      "name": "Conversation Window Buffer Memory"
+    },
+    {
+      "parameters": {
         "formTitle": "KnowledgeBridge Document Ingestion",
         "formDescription": "Secure enterprise portal for indexing knowledge documents (PDF, TXT, DOCX, Markdown) into the KnowledgeBridge vector database.",
         "formFields": {
@@ -107,9 +171,98 @@
       ],
       "id": "b9e178a5-b2f9-4f10-aee6-bd8391d80cf2",
       "name": "Enterprise Document Parser & Chunker"
+    },
+    {
+      "parameters": {
+        "modelName": "=models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        512
+      ],
+      "id": "1bd955af-e8fc-4183-bd01-ec3c712cd512",
+      "name": "Gemini Embedding Generator (Retrieval)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mlDGlX2lonl50RGr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search and retrieve verified enterprise documentation, policy guides, technical specifications, and knowledge articles from the KnowledgeBridge repository. Use this tool whenever the user asks questions requiring factual or organizational context.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-n8n",
+          "mode": "list",
+          "cachedResultName": "rag-n8n"
+        },
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        304
+      ],
+      "id": "bdc65b57-0d41-4cef-bf58-6f06fdc0ae77",
+      "name": "Enterprise Knowledge Base Retriever",
+      "credentials": {
+        "pineconeApi": {
+          "id": "7wBHOaH9kxmmQrj4",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        320,
+        304
+      ],
+      "id": "b025cb52-8f05-42b4-b66d-494e9586cbf5",
+      "name": "Groq LLM Engine",
+      "credentials": {
+        "groqApi": {
+          "id": "B5zitr9thBGDx303",
+          "name": "Groq account"
+        }
+      }
     }
   ],
   "connections": {
+    "Enterprise Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "KnowledgeBridge RAG Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "KnowledgeBridge RAG Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Document Ingestion Form Trigger": {
       "main": [
         [
@@ -138,6 +291,39 @@
           {
             "node": "Pinecone Vector Ingestion Store",
             "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embedding Generator (Retrieval)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Enterprise Knowledge Base Retriever",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enterprise Knowledge Base Retriever": {
+      "ai_tool": [
+        [
+          {
+            "node": "KnowledgeBridge RAG Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq LLM Engine": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "KnowledgeBridge RAG Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
