@@ -62,3 +62,57 @@ Every permission granted to the bot adheres to the principle of least privilege:
 | **`chat:write.customize`** | Write | Permits setting custom profile icons and status badges dynamically. |
 | **`files:read`** | Read | Enables accessing uploaded PDF, TXT, and DOCX metadata (`url_private_download`) for document vectorization. |
 | **`files:write`** | Write | Allows the bot to post file confirmation badges and snippet attachments into the conversation thread. |
+
+---
+
+## 3. Event Verification & Thread State Mechanics
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Engineer
+    participant Slack as Slack API Gateway
+    participant GW as n8n Event Gateway
+    participant AntiLoop as Anti-Loop Filter
+    participant RAG as AI Agent (Groq / Gemini)
+    participant Out as Slack Delivery Node
+
+    User->>Slack: Mentions @n8n in Slack channel
+    Slack->>GW: POST /webhook (Event Payload)
+    GW->>AntiLoop: Evaluate bot_id and subtype
+    alt Incoming Message is Bot Echo
+        AntiLoop->>GW: Discard to Ignore Bot Message (NoOp)
+    else Incoming Message is Human User
+        AntiLoop->>RAG: Pass prompt and thread_ts
+        RAG->>Out: Formulate grounded answer and citations
+        Out->>Slack: chat.postMessage (thread_ts: original_ts)
+        Slack-->>User: In-thread reply appears cleanly
+    end
+```
+
+### Thread Isolation Protocol
+In Slack channels with dozens of engineers discussing different topics concurrently, using user-level memory keys leads to conversational bleed.
+
+The **SlackOps Copilot** solves this by keying the `Window Buffer Memory` directly to the parent message timestamp:
+```javascript
+sessionKey: ={{ $('Slack Trigger').item.json.thread_ts || $('Slack Trigger').item.json.ts }}
+```
+- **New Topic in Channel:** Starts with a new message `ts`, instantiating a fresh memory buffer.
+- **Replies in Thread:** Retain the identical `thread_ts`, preserving up to **10 dialogue turns** of relevant conversation history.
+
+---
+
+## 4. Enterprise Security & DLP Guardrails
+
+### 1. Bearer Token Authenticated File Downloads
+Slack file URLs (`url_private_download`) are secured behind workspace authorization. Passing raw URLs to unauthenticated crawlers returns HTTP 302 redirects to Slack login pages.
+The `Download Slack File` node automatically injects the bot's `Authorization: Bearer xoxb-...` header, safely ingesting the binary stream without exposing tokens to external loggers.
+
+### 2. Infinite Loop Circuit Breaker
+Every automated Slack integration risks runaway recursion if a bot listens to channel messages and responds into the same channel.
+The upstream `Filter Bot Messages` node enforces an unbypassable circuit breaker:
+```javascript
+// Drop bot echoes immediately
+{{ $json.bot_id ? false : ($json.subtype === 'bot_message' ? false : true) }}
+```
+Unmatched items terminate in an explicit `Ignore Bot Message` NoOp node, eliminating unnecessary LLM execution and API quota drain.
