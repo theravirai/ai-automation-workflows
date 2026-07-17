@@ -103,3 +103,104 @@ sudo mkdir -p /home/n8n/.n8n
 sudo chown -R 1000:1000 /home/n8n/.n8n
 sudo chmod 700 /home/n8n/.n8n
 ```
+
+---
+
+## 4. Cloudflare Zero Trust Tunnel Setup
+
+Cloudflare Tunnel (`cloudflared`) establishes a lightweight, bidirectional tunnel directly from the GCP VM to Cloudflare's edge network.
+
+### Benefits
+1. **Zero Open Ports:** External port scanners cannot detect or probe your origin server.
+2. **Automatic TLS 1.3:** Certificates are provisioned and renewed automatically by Cloudflare.
+3. **DDoS Protection & Web Application Firewall (WAF):** Blocks bot floods and malformed payloads before they reach the GCP VM.
+
+### Installation & Systemd Service
+1. Install `cloudflared`:
+   ```bash
+   curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+   sudo dpkg -i cloudflared.deb
+   ```
+2. Authenticate and create the tunnel:
+   ```bash
+   cloudflared tunnel login
+   cloudflared tunnel create n8n-gcp-tunnel
+   ```
+3. Route DNS to the tunnel:
+   ```bash
+   cloudflared tunnel route dns n8n-gcp-tunnel n8n.ravirai.dev
+   ```
+4. Configuration file (`/etc/cloudflared/config.yml`):
+   ```yaml
+   tunnel: <TUNNEL_UUID>
+   credentials-file: /etc/cloudflared/<TUNNEL_UUID>.json
+
+   ingress:
+     - hostname: n8n.ravirai.dev
+       service: http://localhost:5678
+     - service: http_status:404
+   ```
+5. Install and enable the systemd service for zero-downtime auto-boot:
+   ```bash
+   sudo cloudflared service install
+   sudo systemctl enable --now cloudflared
+   ```
+
+---
+
+## 5. Systemd Daemon for Docker Compose
+
+To guarantee n8n restarts automatically if the GCP instance reboots or recovers from a maintenance event, create a systemd service:
+
+File: `/etc/systemd/system/n8n-docker.service`
+```ini
+[Unit]
+Description=n8n Automation Engine
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/n8n
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable the service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now n8n-docker.service
+```
+
+---
+
+## 6. Automated Backup Strategy
+
+To prevent data loss of workflows, credentials, and execution history, an automated cron job syncs the SQLite database to a Google Cloud Storage (GCS) bucket:
+
+```bash
+#!/usr/bin/env bash
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+BACKUP_DIR="/tmp/n8n_backups"
+GCS_BUCKET="gs://cloudscale-n8n-backups"
+
+mkdir -p "$BACKUP_DIR"
+# Safe hot backup using SQLite online backup
+sqlite3 /home/n8n/.n8n/database.sqlite ".backup '$BACKUP_DIR/n8n_$TIMESTAMP.sqlite'"
+
+# Compress and upload to GCS
+gzip "$BACKUP_DIR/n8n_$TIMESTAMP.sqlite"
+gsutil cp "$BACKUP_DIR/n8n_$TIMESTAMP.sqlite.gz" "$GCS_BUCKET/"
+
+# Retain only last 30 days of local backups
+find "$BACKUP_DIR" -type f -name "*.sqlite.gz" -mtime +30 -delete
+```
+Schedule via crontab (`crontab -e`):
+```cron
+0 2 * * * /home/n8n/scripts/backup_n8n.sh > /dev/null 2>&1
+```
