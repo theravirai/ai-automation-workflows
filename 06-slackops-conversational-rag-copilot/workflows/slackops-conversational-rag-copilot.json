@@ -1,0 +1,117 @@
+{
+  "name": "SlackOps Conversational RAG Copilot",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention",
+          "file_share"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C0C4T5VATPE",
+          "mode": "list",
+          "cachedResultName": "slack-enterprise-rag-assistant"
+        },
+        "downloadFiles": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        -336
+      ],
+      "id": "62a29f3d-fe8d-4b5d-acfd-fb3d4a12d2e8",
+      "name": "Slack Trigger",
+      "webhookId": "00000000-0000-0000-0000-000000000000",
+      "credentials": {
+        "slackApi": {
+          "id": "slackApi_credential_id",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.bot_id }}",
+              "operator": {
+                "operation": "empty",
+                "type": "string"
+              },
+              "rightValue": ""
+            },
+            {
+              "leftValue": "={{ $json.subtype }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "bot_message"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "bc7a6dce-8d0c-4d4b-95a2-c3cd37588a16",
+      "name": "Filter Bot Messages",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1200,
+        -240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7dfb56cd-dc76-4141-9def-3e6db1901d4c",
+      "name": "Ignore Bot Message",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Bot Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Bot Messages": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Ignore Bot Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  }
+}
