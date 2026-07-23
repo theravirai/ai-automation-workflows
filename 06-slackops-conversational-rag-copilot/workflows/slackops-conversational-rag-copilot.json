@@ -82,6 +82,124 @@
         -1136,
         0
       ]
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Enterprise Document' }}"
+              },
+              {
+                "name": "source",
+                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Slack Document' }}"
+              },
+              {
+                "name": "category",
+                "value": "slack_enterprise_docs"
+              },
+              {
+                "name": "uploaded_at",
+                "value": "={{ $now.toISO() }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        -464
+      ],
+      "id": "c679a279-39c1-4137-b6ea-29bc56f34e1d",
+      "name": "Enterprise Document Parser & Chunker"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.files?.length || 0 }}",
+              "operator": {
+                "operation": "gt",
+                "type": "number"
+              },
+              "rightValue": 0
+            },
+            {
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "operator": {
+                "operation": "gt",
+                "type": "number"
+              },
+              "rightValue": 0
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "e9d75628-6196-47f6-a593-8d1f08589c22",
+      "name": "Has File Attached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 150,
+        "options": {}
+      },
+      "id": "de4e1542-c9c1-4d72-be71-fc5983a7f549",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Slack Trigger').item.json.files[0].url_private_download }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "slackApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "5e3b9654-9bfc-45b5-b2a3-15a332cc560e",
+      "name": "Download Slack File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -656,
+        -672
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "slackApi_credential_id",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "connections": {
@@ -98,11 +216,40 @@
     },
     "Filter Bot Messages": {
       "main": [
-        [],
+        [
+          {
+            "node": "Has File Attached?",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Ignore Bot Message",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has File Attached?": {
+      "main": [
+        [
+          {
+            "node": "Download Slack File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Enterprise Document Parser & Chunker",
+            "type": "ai_textSplitter",
             "index": 0
           }
         ]
