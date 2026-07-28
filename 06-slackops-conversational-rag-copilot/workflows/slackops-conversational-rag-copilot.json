@@ -34,257 +34,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "combinator": "and",
-          "conditions": [
-            {
-              "leftValue": "={{ $json.bot_id }}",
-              "operator": {
-                "operation": "empty",
-                "type": "string"
-              },
-              "rightValue": ""
-            },
-            {
-              "leftValue": "={{ $json.subtype }}",
-              "operator": {
-                "operation": "notEquals",
-                "type": "string"
-              },
-              "rightValue": "bot_message"
-            }
-          ],
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          }
-        },
-        "options": {}
-      },
-      "id": "bc7a6dce-8d0c-4d4b-95a2-c3cd37588a16",
-      "name": "Filter Bot Messages",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -1200,
-        -240
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "7dfb56cd-dc76-4141-9def-3e6db1901d4c",
-      "name": "Ignore Bot Message",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        -1136,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "dataType": "binary",
-        "textSplittingMode": "custom",
-        "options": {
-          "metadata": {
-            "metadataValues": [
-              {
-                "name": "title",
-                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Enterprise Document' }}"
-              },
-              {
-                "name": "source",
-                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Slack Document' }}"
-              },
-              {
-                "name": "category",
-                "value": "slack_enterprise_docs"
-              },
-              {
-                "name": "uploaded_at",
-                "value": "={{ $now.toISO() }}"
-              }
-            ]
-          }
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
-      "typeVersion": 1.1,
-      "position": [
-        -352,
-        -464
-      ],
-      "id": "c679a279-39c1-4137-b6ea-29bc56f34e1d",
-      "name": "Enterprise Document Parser & Chunker"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "combinator": "or",
-          "conditions": [
-            {
-              "leftValue": "={{ $json.files?.length || 0 }}",
-              "operator": {
-                "operation": "gt",
-                "type": "number"
-              },
-              "rightValue": 0
-            },
-            {
-              "leftValue": "={{ Object.keys($binary || {}).length }}",
-              "operator": {
-                "operation": "gt",
-                "type": "number"
-              },
-              "rightValue": 0
-            }
-          ],
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          }
-        },
-        "options": {}
-      },
-      "id": "e9d75628-6196-47f6-a593-8d1f08589c22",
-      "name": "Has File Attached?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -960,
-        -144
-      ]
-    },
-    {
-      "parameters": {
-        "chunkOverlap": 150,
-        "options": {}
-      },
-      "id": "de4e1542-c9c1-4d72-be71-fc5983a7f549",
-      "name": "Recursive Character Text Splitter",
-      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
-      "typeVersion": 1,
-      "position": [
-        -304,
-        -304
-      ]
-    },
-    {
-      "parameters": {
-        "url": "={{ $('Slack Trigger').item.json.files[0].url_private_download }}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "slackApi",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file"
-            }
-          }
-        }
-      },
-      "id": "5e3b9654-9bfc-45b5-b2a3-15a332cc560e",
-      "name": "Download Slack File",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -656,
-        -672
-      ],
-      "credentials": {
-        "slackApi": {
-          "id": "slackApi_credential_id",
-          "name": "Slack account"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        -560,
-        -448
-      ],
-      "id": "9103a7c7-abb8-42fd-90ba-633bc91dba42",
-      "name": "Gemini Embedding Generator (Ingestion)",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "googlePalmApi_credential_id",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "mode": "insert",
-        "pineconeIndex": {
-          "__rl": true,
-          "value": "rag-n8n",
-          "mode": "list",
-          "cachedResultName": "rag-n8n"
-        },
-        "options": {
-          "pineconeNamespace": "enterprise-knowledge-base"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
-      "typeVersion": 1.3,
-      "position": [
-        -400,
-        -672
-      ],
-      "id": "ec5b3898-4d39-43f4-8ff4-d7792648c460",
-      "name": "Pinecone Vector Ingestion Store",
-      "credentials": {
-        "pineconeApi": {
-          "id": "pineconeApi_credential_id",
-          "name": "Pinecone account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "cachedResultName": "slack-enterprise-rag-assistant",
-          "mode": "list",
-          "value": "C0C4T5VATPE"
-        },
-        "text": "=:white_check_mark: *Document Indexed Successfully*\n*File:* `{{ $('Slack Trigger').item.json.files?.[0]?.name || 'Uploaded Document' }}`\n*Status:* Ingested and embedded into the enterprise vector store (`rag-n8n`).",
-        "otherOptions": {
-          "includeLinkToWorkflow": false,
-          "thread_ts": {
-            "replyValues": {
-              "thread_ts": "={{ $('Slack Trigger').item.json.thread_ts || $('Slack Trigger').item.json.ts }}"
-            }
-          },
-          "mrkdwn": true
-        }
-      },
-      "id": "dd5ca12f-d987-4585-b63f-ac83a00b7e46",
-      "name": "Slack Ingestion Confirmation",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.7,
-      "position": [
-        -48,
-        -672
-      ],
-      "webhookId": "00000000-0000-0000-0000-000000000000",
-      "executeOnce": true,
-      "credentials": {
-        "slackApi": {
-          "id": "slackApi_credential_id",
-          "name": "Slack account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "select": "channel",
         "channelId": {
           "__rl": true,
@@ -410,6 +159,87 @@
       }
     },
     {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -448
+      ],
+      "id": "9103a7c7-abb8-42fd-90ba-633bc91dba42",
+      "name": "Gemini Embedding Generator (Ingestion)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "googlePalmApi_credential_id",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "title",
+                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Enterprise Document' }}"
+              },
+              {
+                "name": "source",
+                "value": "={{ $binary.data?.fileName || $binary.Upload_File?.fileName || 'Slack Document' }}"
+              },
+              {
+                "name": "category",
+                "value": "slack_enterprise_docs"
+              },
+              {
+                "name": "uploaded_at",
+                "value": "={{ $now.toISO() }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        -464
+      ],
+      "id": "c679a279-39c1-4137-b6ea-29bc56f34e1d",
+      "name": "Enterprise Document Parser & Chunker"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-n8n",
+          "mode": "list",
+          "cachedResultName": "rag-n8n"
+        },
+        "options": {
+          "pineconeNamespace": "enterprise-knowledge-base"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        -672
+      ],
+      "id": "ec5b3898-4d39-43f4-8ff4-d7792648c460",
+      "name": "Pinecone Vector Ingestion Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "pineconeApi_credential_id",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
       "parameters": {
         "mode": "retrieve-as-tool",
         "toolDescription": "Search and retrieve verified enterprise documentation, policy guides, technical specifications, and knowledge articles from the KnowledgeBridge repository. Use this tool whenever the user asks questions requiring factual or organizational context.",
@@ -435,6 +265,176 @@
         "pineconeApi": {
           "id": "pineconeApi_credential_id",
           "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.bot_id }}",
+              "operator": {
+                "operation": "empty",
+                "type": "string"
+              },
+              "rightValue": ""
+            },
+            {
+              "leftValue": "={{ $json.subtype }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "bot_message"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "bc7a6dce-8d0c-4d4b-95a2-c3cd37588a16",
+      "name": "Filter Bot Messages",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1200,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.files?.length || 0 }}",
+              "operator": {
+                "operation": "gt",
+                "type": "number"
+              },
+              "rightValue": 0
+            },
+            {
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "operator": {
+                "operation": "gt",
+                "type": "number"
+              },
+              "rightValue": 0
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "e9d75628-6196-47f6-a593-8d1f08589c22",
+      "name": "Has File Attached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 150,
+        "options": {}
+      },
+      "id": "de4e1542-c9c1-4d72-be71-fc5983a7f549",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "cachedResultName": "slack-enterprise-rag-assistant",
+          "mode": "list",
+          "value": "C0C4T5VATPE"
+        },
+        "text": "=:white_check_mark: *Document Indexed Successfully*\n*File:* `{{ $('Slack Trigger').item.json.files?.[0]?.name || 'Uploaded Document' }}`\n*Status:* Ingested and embedded into the enterprise vector store (`rag-n8n`).",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Slack Trigger').item.json.thread_ts || $('Slack Trigger').item.json.ts }}"
+            }
+          },
+          "mrkdwn": true
+        }
+      },
+      "id": "dd5ca12f-d987-4585-b63f-ac83a00b7e46",
+      "name": "Slack Ingestion Confirmation",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -48,
+        -672
+      ],
+      "webhookId": "00000000-0000-0000-0000-000000000000",
+      "executeOnce": true,
+      "credentials": {
+        "slackApi": {
+          "id": "slackApi_credential_id",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "7dfb56cd-dc76-4141-9def-3e6db1901d4c",
+      "name": "Ignore Bot Message",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Slack Trigger').item.json.files[0].url_private_download }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "slackApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "5e3b9654-9bfc-45b5-b2a3-15a332cc560e",
+      "name": "Download Slack File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -656,
+        -672
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "slackApi_credential_id",
+          "name": "Slack account"
         }
       }
     }
@@ -613,5 +613,49 @@
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": true
+  },
+  "nodeGroups": [
+    {
+      "id": "c4b8d98e-ae43-4612-b2ac-34774d43b36b",
+      "name": "Slack Event Guardrails",
+      "nodeNames": [
+        "Filter Bot Messages",
+        "Has File Attached?",
+        "Ignore Bot Message"
+      ],
+      "description": "Filters out bot loops and detects shared attachments."
+    },
+    {
+      "id": "6256d451-85da-4f6b-9954-691a68201dac",
+      "name": "SlackOps Conversational RAG Copilot",
+      "nodeNames": [
+        "AI Agent",
+        "Groq Chat Model",
+        "Google Gemini Chat Model",
+        "Simple Memory",
+        "Knowledge Base Retriever",
+        "Embeddings Google Gemini",
+        "Send a message"
+      ],
+      "description": "Conversational RAG agent with thread-level memory and in-thread replies."
+    },
+    {
+      "id": "973baf14-04e1-4bf0-b178-69308369c412",
+      "name": "In-Slack Document Ingestion Pipeline",
+      "nodeNames": [
+        "Download Slack File",
+        "Pinecone Vector Ingestion Store",
+        "Gemini Embedding Generator (Ingestion)",
+        "Enterprise Document Parser & Chunker",
+        "Recursive Character Text Splitter",
+        "Slack Ingestion Confirmation"
+      ],
+      "description": "Downloads, parses, chunks, embeds, and indexes documents shared in Slack."
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
   }
 }
