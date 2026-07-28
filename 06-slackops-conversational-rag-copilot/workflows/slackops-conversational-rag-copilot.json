@@ -282,6 +282,95 @@
           "name": "Slack account"
         }
       }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C4T5VATPE",
+          "mode": "list",
+          "cachedResultName": "slack-enterprise-rag-assistant"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Slack Trigger').item.json.thread_ts || $('Slack Trigger').item.json.ts }}"
+            }
+          },
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        720,
+        -272
+      ],
+      "id": "149cc7b5-7b31-4ad6-aaeb-963d67d2eead",
+      "name": "Send a message",
+      "webhookId": "00000000-0000-0000-0000-000000000000",
+      "credentials": {
+        "slackApi": {
+          "id": "slackApi_credential_id",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are SlackOps Knowledge Copilot, an enterprise-grade AI knowledge assistant designed for high-performing teams collaborating in Slack.\n\n### MANDATORY RETRIEVAL PROTOCOL:\n1. Always query the 'Enterprise_Knowledge_Base_Retriever' tool for every inquiry requiring organizational facts, policy guidelines, technical architecture, or internal procedures.\n2. Ground all answers strictly on retrieved document excerpts. Never extrapolate, speculate, or invent internal details.\n\n### SLACK FORMATTING & STYLE:\n1. **Direct & High-Impact**: Get straight to the answer without conversational filler or preambles like \"Based on the retrieved documents...\".\n2. **Scannable Structure**: Use bold bullet points and Slack markdown (*bold*, _italic_, `code`). Aim for 3 to 6 concise, informative bullet points.\n3. **Transparent Citations**: Always cite the exact document name at the end:\n   *Source: <filename>*\n4. **Context Boundaries**: If the retrieved context does not contain enough information to answer reliably, reply:\n   \"I could not find verified documentation regarding your request in the enterprise knowledge base. You can upload relevant policy or tech specs directly into this channel to index them.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        -288
+      ],
+      "id": "08b0f7a7-f000-426c-8ec5-0f1722e0b794",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.blocks[0].elements[0].elements[1].text }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        -16
+      ],
+      "id": "91276d22-b98a-489c-9416-c7aee6c4e134",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -96
+      ],
+      "id": "1dbb2d8e-24c4-4759-bcc5-bb2c885a89e9",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "groqApi_credential_id",
+          "name": "Groq account"
+        }
+      }
     }
   ],
   "connections": {
@@ -323,7 +412,13 @@
             "index": 0
           }
         ],
-        []
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Download Slack File": {
@@ -376,6 +471,39 @@
           {
             "node": "Slack Ingestion Confirmation",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
             "index": 0
           }
         ]
