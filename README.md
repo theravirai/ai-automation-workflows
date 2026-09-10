@@ -1,11 +1,68 @@
-# Enterprise AI Automation Workflows
+# Enterprise AI Automation Workflows & Autonomous Agent Systems
 
-![Workflows](https://img.shields.io/badge/Status-Active%20Portfolio-success?style=for-the-badge)
-![n8n](https://img.shields.io/badge/Platform-n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
-![AI Agents](https://img.shields.io/badge/Architecture-Agentic%20RAG-7928CA?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+[![Infrastructure](https://img.shields.io/badge/Infrastructure-Google%20Cloud%20Platform-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](06-slackops-conversational-rag-copilot/docs/gcp-deployment-guide.md)
+[![Security](https://img.shields.io/badge/Security-Cloudflare%20Zero%20Trust-F38020?style=flat-square&logo=cloudflare&logoColor=white)](06-slackops-conversational-rag-copilot/docs/gcp-deployment-guide.md)
+[![Containers](https://img.shields.io/badge/Containers-Docker%20%7C%20Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](06-slackops-conversational-rag-copilot/docs/gcp-deployment-guide.md)
+[![Orchestrator](https://img.shields.io/badge/Orchestrator-n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](https://n8n.io)
+[![Standard](https://img.shields.io/badge/Standard-Model%20Context%20Protocol%20(MCP)-7928CA?style=flat-square)](04-agentbridge-ai-tool-calling-platform-using-mcp/)
+[![Framework](https://img.shields.io/badge/Framework-LangChain-1C3C3C?style=flat-square&logo=langchain&logoColor=white)](03-ai-assistant-orchestrator/)
+[![Vector Store](https://img.shields.io/badge/Vector%20Store-Pinecone%20Serverless-000000?style=flat-square&logo=pinecone&logoColor=white)](05-knowledgebridge-enterprise-rag-assistant/)
+[![LLM Inference](https://img.shields.io/badge/LLM%20Inference-Groq%20LPU-F55036?style=flat-square&logo=fastapi&logoColor=white)](06-slackops-conversational-rag-copilot/)
+[![Embeddings](https://img.shields.io/badge/Embeddings-Google%20Gemini%20(3072--dim)-4285F4?style=flat-square&logo=google&logoColor=white)](05-knowledgebridge-enterprise-rag-assistant/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-A curated collection of production-grade **AI automation workflows**, autonomous agent pipelines, and enterprise integrations designed for real-world business impact. Built with **n8n**, **Groq**, **Pinecone**, **Google Gemini**, and modern enterprise APIs.
+A curated collection of six production-grade AI automation pipelines, autonomous agent orchestrators, and Model Context Protocol (MCP) integrations deployed on Google Cloud Platform (GCP). The systems in this repository address real-world business challenges: automated customer support triage, deterministic financial ledger processing, multi-tool assistant routing, enterprise Model Context Protocol platforms, and collaborative ChatOps knowledge retrieval.
+
+---
+
+## Architectural Blueprint
+
+The following diagram illustrates the multi-tier architecture spanning cloud ingress, self-hosted orchestration, redundant inference models, and vector knowledge stores:
+
+```mermaid
+flowchart TB
+    subgraph Ingress ["1. Multi-Channel Event Ingress"]
+        Slack["Slack API Webhooks<br/>(Mentions, Files, DMs)"]
+        Gmail["Gmail Triggers<br/>(Customer Emails & Invoices)"]
+        Drive["Google Drive<br/>(Document Intake)"]
+        MCPClient["MCP Clients<br/>(Cursor, Claude Desktop, IDEs)"]
+    end
+
+    subgraph Infrastructure ["2. Production Cloud Infrastructure (GCP us-central1-a)"]
+        CF["Cloudflare Zero Trust Tunnel<br/>(n8n.ravirai.dev / End-to-End TLS 1.3)"]
+        Docker["Docker Compose Stack<br/>(n8n Orchestrator / Port 5678)"]
+        Systemd["systemd Daemon<br/>(Auto-Restart Service)"]
+        Backup["Automated Hot Backups<br/>(Cron to Google Cloud Storage)"]
+        
+        CF <-->|"Internal HTTP 5678"| Docker
+        Systemd -.-> Docker
+        Docker -.-> Backup
+    end
+
+    subgraph ReasoningMesh ["3. Resilient Multi-LLM Reasoning Mesh"]
+        Groq["Groq LPU<br/>(GPT-OSS 120B / LLaMA 3.3 / Qwen 27B)"]
+        Gemini["Google Gemini 2.5 Flash Lite<br/>(Zero-Downtime Failover LLM)"]
+        Mistral["Mistral Cloud<br/>(Specialized Fallback LLM)"]
+        
+        Groq -.->|"Automatic Failover"| Gemini
+        Groq -.->|"Dynamic Routing"| Mistral
+    end
+
+    subgraph Storage ["4. Knowledge Bases & Systems of Record"]
+        Pinecone[("Pinecone Serverless<br/>3072-dim Gemini Embeddings")]
+        Sheets[("Google Sheets Ledger<br/>Verified Financial Records")]
+        Memory[("Window Buffer Memory<br/>10-Turn Thread-Scoped State")]
+    end
+
+    Slack -->|"Encrypted Ingress"| CF
+    Gmail -->|"Encrypted Ingress"| CF
+    Drive -->|"Encrypted Ingress"| CF
+    MCPClient -->|"Encrypted Ingress"| CF
+    Docker --> ReasoningMesh
+    ReasoningMesh <--> Pinecone
+    ReasoningMesh <--> Sheets
+    ReasoningMesh <--> Memory
+```
 
 ---
 
