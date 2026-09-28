@@ -17,52 +17,18 @@ A curated collection of six production-grade AI automation pipelines, autonomous
 
 ## Architectural Blueprint
 
-The following diagram illustrates the multi-tier architecture spanning cloud ingress, self-hosted orchestration, redundant inference models, and vector knowledge stores:
+The repository's workflows are engineered around a decoupled 4-tier architecture deployed across production cloud infrastructure (GCP Compute Engine, Cloudflare Zero Trust, Docker Compose), specialized inference engines, and vector memory systems:
 
-```mermaid
-flowchart TB
-    subgraph Ingress ["1. Multi-Channel Event Ingress"]
-        Slack["Slack API Webhooks<br/>(Mentions, Files, DMs)"]
-        Gmail["Gmail Triggers<br/>(Customer Emails & Invoices)"]
-        Drive["Google Drive<br/>(Document Intake)"]
-        MCPClient["MCP Clients<br/>(Cursor, Claude Desktop, IDEs)"]
-    end
+![Enterprise Architecture Blueprint](assets/architecture-blueprint.svg)
 
-    subgraph Infrastructure ["2. Production Cloud Infrastructure (GCP us-central1-a)"]
-        CF["Cloudflare Zero Trust Tunnel<br/>(n8n.ravirai.dev / End-to-End TLS 1.3)"]
-        Docker["Docker Compose Stack<br/>(n8n Orchestrator / Port 5678)"]
-        Systemd["systemd Daemon<br/>(Auto-Restart Service)"]
-        Backup["Automated Hot Backups<br/>(Cron to Google Cloud Storage)"]
-        
-        CF <-->|"Internal HTTP 5678"| Docker
-        Systemd -.-> Docker
-        Docker -.-> Backup
-    end
+### Tier Responsibility Matrix
 
-    subgraph ReasoningMesh ["3. Resilient Multi-LLM Reasoning Mesh"]
-        Groq["Groq LPU<br/>(GPT-OSS 120B / LLaMA 3.3 / Qwen 27B)"]
-        Gemini["Google Gemini 2.5 Flash Lite<br/>(Zero-Downtime Failover LLM)"]
-        Mistral["Mistral Cloud<br/>(Specialized Fallback LLM)"]
-        
-        Groq -.->|"Automatic Failover"| Gemini
-        Groq -.->|"Dynamic Routing"| Mistral
-    end
-
-    subgraph Storage ["4. Knowledge Bases & Systems of Record"]
-        Pinecone[("Pinecone Serverless<br/>3072-dim Gemini Embeddings")]
-        Sheets[("Google Sheets Ledger<br/>Verified Financial Records")]
-        Memory[("Window Buffer Memory<br/>10-Turn Thread-Scoped State")]
-    end
-
-    Slack -->|"Encrypted Ingress"| CF
-    Gmail -->|"Encrypted Ingress"| CF
-    Drive -->|"Encrypted Ingress"| CF
-    MCPClient -->|"Encrypted Ingress"| CF
-    Docker --> ReasoningMesh
-    ReasoningMesh <--> Pinecone
-    ReasoningMesh <--> Sheets
-    ReasoningMesh <--> Memory
-```
+| Architectural Tier | Technologies & Components | Core Responsibilities | Security & Reliability Boundary |
+| :--- | :--- | :--- | :--- |
+| **1. Event Ingress** | Slack Webhooks, Gmail API, Google Drive, MCP Protocol | Multi-channel trigger reception, file attachment intake, and initial webhook handshake. | Least-privilege OAuth scopes, TLS 1.3 encrypted transport. |
+| **2. Cloud Orchestration** | GCP Compute Engine (`us-central1-a`), Docker Compose, Cloudflare Zero Trust | Event routing, anti-loop filtering, schema normalization, and persistent process management. | Zero public open ports; systemd auto-healing service; GCS automated backups. |
+| **3. Reasoning Mesh** | Groq LPU (GPT-OSS 120B / LLaMA 3.3), Google Gemini 2.5, LangChain ReAct | Intent classification, multi-step tool execution, and contextual markdown synthesis. | Automatic failover to secondary model upon upstream API rate-limiting or latency spikes. |
+| **4. Knowledge & Records** | Pinecone Serverless (3072-dim), Google Sheets, Thread Window Memory | Dense semantic retrieval, conversation state preservation, and immutable ledger recording. | Strict zero-hallucination prompt boundaries; deterministic arithmetic and date validation. |
 
 ---
 
