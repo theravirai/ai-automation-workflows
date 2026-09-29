@@ -21,6 +21,73 @@ The repository's workflows are engineered around a decoupled 4-tier architecture
 
 ![Enterprise Architecture Blueprint](assets/architecture-blueprint.svg)
 
+### End-to-End Orchestration Flow
+
+```mermaid
+flowchart TD
+    subgraph Ingress["1. Multi-Channel Event Ingress"]
+        Slack["Slack API Webhooks<br/><i>(Mentions, Attachments, Thread DMs)</i>"]
+        Gmail["Gmail Event Triggers<br/><i>(AP Invoices & Support Inquiries)</i>"]
+        Drive["Google Drive Intake<br/><i>(Document Intake & OCR Drops)</i>"]
+        MCP["MCP Protocol Clients<br/><i>(Cursor, Claude Desktop, IDEs)</i>"]
+    end
+
+    subgraph Gateway["2. Secure Cloud Gateway (GCP us-central1-a)"]
+        CF["Cloudflare Zero Trust Tunnel<br/><i>(End-to-End TLS 1.3 / Zero Open Ports)</i>"]
+        Docker["Docker Compose Runtime<br/><i>(n8n Orchestration Engine)</i>"]
+        Systemd["systemd Daemon<br/><i>(Zero-Downtime Auto-Restart)</i>"]
+        Guard["Safety Guardrails & Normalizers<br/><i>(Anti-Loop NoOp & Schema Validation)</i>"]
+
+        CF --> Docker
+        Systemd -.->|Supervises| Docker
+        Docker --> Guard
+    end
+
+    subgraph Reasoning["3. Resilient Multi-LLM Reasoning Mesh"]
+        Engine["LangChain ReAct Agent Engine<br/><i>(Dynamic Tool Router & Dispatcher)</i>"]
+        Groq["Groq LPU Primary<br/><i>(GPT-OSS 120B / LLaMA 3.3)</i>"]
+        Gemini["Google Gemini 2.5 Flash Lite<br/><i>(Zero-Downtime 429 Failover)</i>"]
+        MCPTool["MCP Tool Server<br/><i>(Standardized Schema Negotiation)</i>"]
+        Tools["Domain Sub-Workflows<br/><i>(Forex, Weather, Calc, Ledgers)</i>"]
+
+        Groq -.->|ai_languageModel| Engine
+        Gemini -.->|failover_languageModel| Engine
+        Groq -.->|Automatic 429 Failover| Gemini
+        Engine <-->|Tool Call Protocol| MCPTool
+        Engine -->|Sub-Workflow Execution| Tools
+    end
+
+    subgraph Storage["4. Knowledge Bases & Systems of Record"]
+        Pinecone[("Pinecone Serverless Vector DB<br/><i>(3072-dim Gemini Dense Embeddings)</i>")]
+        Memory[("Thread Window Memory Buffer<br/><i>(10-Turn Context Window)</i>")]
+        Ledger[("Google Sheets Ledgers<br/><i>(Verified Financial Records)</i>")]
+        GCS[("Google Cloud Storage<br/><i>(Cron-Automated Hot Backups)</i>")]
+    end
+
+    Slack -->|Encrypted TLS 1.3 Ingress| CF
+    Gmail -->|Encrypted TLS 1.3 Ingress| CF
+    Drive -->|Encrypted TLS 1.3 Ingress| CF
+    MCP -->|Encrypted TLS 1.3 Ingress| CF
+
+    Guard -->|Normalized Payloads| Engine
+    Engine <-->|Dense Semantic RAG| Pinecone
+    Engine <-->|Context Thread State| Memory
+    Engine -->|Deterministic Audit Logging| Ledger
+    Docker -.->|Automated Database Backup| GCS
+
+    classDef ingress fill:#e1f5fe,stroke:#0288d1,stroke-width:1px;
+    classDef gateway fill:#fff3e0,stroke:#f57c00,stroke-width:1px;
+    classDef reasoning fill:#ede7f6,stroke:#512da8,stroke-width:1px;
+    classDef model fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px;
+    classDef storage fill:#e8f5e9,stroke:#388e3c,stroke-width:1px;
+
+    class Slack,Gmail,Drive,MCP ingress;
+    class CF,Docker,Systemd,Guard gateway;
+    class Engine,MCPTool,Tools reasoning;
+    class Groq,Gemini model;
+    class Pinecone,Memory,Ledger,GCS storage;
+```
+
 ### Tier Responsibility Matrix
 
 | Architectural Tier | Technologies & Components | Core Responsibilities | Security & Reliability Boundary |
